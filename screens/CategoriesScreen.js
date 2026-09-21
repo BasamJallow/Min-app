@@ -53,7 +53,6 @@ export default function CategoriesScreen({ route, navigation, xp, completed }) {
       <ScrollView contentContainerStyle={styles.path}>
         {progress.map((cat, i) => {
           const isActive = i === activeIndex;
-          const isLocked = i > activeIndex;
           const offset = OFFSETS[i % OFFSETS.length];
 
           return (
@@ -65,27 +64,20 @@ export default function CategoriesScreen({ route, navigation, xp, completed }) {
                   </View>
                 )}
                 <TouchableOpacity
-                  activeOpacity={isLocked ? 1 : 0.7}
-                  disabled={isLocked}
+                  activeOpacity={0.7}
                   onPress={() =>
                     navigation.navigate('Question', {
                       category: cat.name,
                       questions: cat.list,
                     })
                   }
-                  style={[
-                    styles.node,
-                    cat.allDone && styles.nodeDone,
-                    isLocked && styles.nodeLocked,
-                  ]}
+                  style={[styles.node, cat.allDone && styles.nodeDone]}
                 >
-                  <Text style={[styles.nodeIcon, isLocked && styles.nodeIconLocked]}>
-                    {isLocked ? '🔒' : cat.allDone ? '⭐' : cat.icon}
+                  <Text style={styles.nodeIcon}>
+                    {cat.allDone ? '⭐' : cat.icon}
                   </Text>
                 </TouchableOpacity>
-                <Text style={[styles.nodeLabel, isLocked && styles.nodeLabelLocked]}>
-                  {cat.name}
-                </Text>
+                <Text style={styles.nodeLabel}>{cat.name}</Text>
                 <Text style={[styles.nodeProgress, cat.allDone && styles.nodeProgressDone]}>
                   {cat.done}/{cat.total}
                 </Text>
@@ -105,7 +97,10 @@ export default function CategoriesScreen({ route, navigation, xp, completed }) {
         <TouchableOpacity style={styles.bottomNavItem}>
           <Text style={styles.bottomNavIcon}>💪</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.bottomNavItem}>
+        <TouchableOpacity
+          style={styles.bottomNavItem}
+          onPress={() => navigation.navigate('Profile')}
+        >
           <Text style={styles.bottomNavIcon}>👤</Text>
         </TouchableOpacity>
       </View>

@@ -3,12 +3,17 @@ import { View, Text, TextInput, TouchableOpacity } from 'react-native';
 import { styles } from '../styles';
 import { analyzeJobPost, generateQuestions } from '../questions';
 
-export default function JobPostScreen({ navigation }) {
+export default function JobPostScreen({ navigation, addJobPost }) {
   const [text, setText] = useState('');
 
   const handleAnalyze = () => {
     const skills = analyzeJobPost(text);
     const questions = generateQuestions(skills);
+    addJobPost({
+      id: Date.now(),
+      preview: text.trim().slice(0, 100),
+      skills,
+    });
     navigation.navigate('Categories', { skills, questions });
   };
 
