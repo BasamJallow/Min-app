@@ -5,7 +5,8 @@ En React Native / Expo-app der hjælper brugeren med at træne jobinterviews ud 
 ## Links
 
 - **GitHub:** https://github.com/BasamJallow/Min-app
-- **Video-gennemgang:** _[indsæt link her]_
+- **Video-gennemgang:** https://www.loom.com/share/1c78aa8be41d49ecbb7eb69dae4815ff
+
 
 ## Kom i gang
 
