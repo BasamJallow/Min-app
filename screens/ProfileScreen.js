@@ -1,4 +1,4 @@
-import { View, Text, ScrollView, TouchableOpacity } from 'react-native';
+import { View, Text, FlatList, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { styles } from '../styles';
 
@@ -20,6 +20,59 @@ export default function ProfileScreen({ navigation, xp, completed, jobPosts }) {
   const done = completed.length;
   const applied = jobPosts.length;
 
+  const history = jobPosts.slice().reverse();
+
+  const renderHeader = () => (
+    <>
+      <View style={styles.profileHeader}>
+        <View style={styles.profileAvatar}>
+          <Text style={styles.profileAvatarText}>👤</Text>
+        </View>
+        <Text style={styles.profileName}>Din profil</Text>
+        <Text style={styles.profileSub}>Din progression og historik</Text>
+      </View>
+
+      <View style={styles.statGrid}>
+        <View style={styles.statCard}>
+          <Text style={styles.statValue}>{xp}</Text>
+          <Text style={styles.statLabel}>XP</Text>
+        </View>
+        <View style={styles.statCard}>
+          <Text style={styles.statValue}>{streak}</Text>
+          <Text style={styles.statLabel}>Streak</Text>
+        </View>
+        <View style={styles.statCard}>
+          <Text style={styles.statValue}>{done}</Text>
+          <Text style={styles.statLabel}>Øvelser</Text>
+        </View>
+        <View style={styles.statCard}>
+          <Text style={styles.statValue}>{applied}</Text>
+          <Text style={styles.statLabel}>Opslag</Text>
+        </View>
+      </View>
+
+      <Text style={styles.sectionHeader}>Analyserede jobopslag</Text>
+    </>
+  );
+
+  const renderEmpty = () => (
+    <View style={styles.emptyCard}>
+      <Text style={styles.emptyText}>
+        Du har ikke analyseret et opslag endnu. Gå tilbage og indsæt dit første jobopslag.
+      </Text>
+    </View>
+  );
+
+  const renderItem = ({ item }) => (
+    <View style={styles.historyCard}>
+      <Text style={styles.historyDate}>{formatDate(item.id)}</Text>
+      <Text style={styles.historyPreview} numberOfLines={2}>
+        {item.preview}
+      </Text>
+      <Text style={styles.historySkills}>Nøgleord: {item.skills.join(', ')}</Text>
+    </View>
+  );
+
   return (
     <SafeAreaView style={styles.boardRoot} edges={['top', 'left', 'right']}>
       <View style={styles.hud}>
@@ -36,59 +89,14 @@ export default function ProfileScreen({ navigation, xp, completed, jobPosts }) {
         </View>
       </View>
 
-      <ScrollView contentContainerStyle={styles.profileScroll}>
-        <View style={styles.profileHeader}>
-          <View style={styles.profileAvatar}>
-            <Text style={styles.profileAvatarText}>👤</Text>
-          </View>
-          <Text style={styles.profileName}>Din profil</Text>
-          <Text style={styles.profileSub}>Din progression og historik</Text>
-        </View>
-
-        <View style={styles.statGrid}>
-          <View style={styles.statCard}>
-            <Text style={styles.statValue}>{xp}</Text>
-            <Text style={styles.statLabel}>XP</Text>
-          </View>
-          <View style={styles.statCard}>
-            <Text style={styles.statValue}>{streak}</Text>
-            <Text style={styles.statLabel}>Streak</Text>
-          </View>
-          <View style={styles.statCard}>
-            <Text style={styles.statValue}>{done}</Text>
-            <Text style={styles.statLabel}>Øvelser</Text>
-          </View>
-          <View style={styles.statCard}>
-            <Text style={styles.statValue}>{applied}</Text>
-            <Text style={styles.statLabel}>Opslag</Text>
-          </View>
-        </View>
-
-        <Text style={styles.sectionHeader}>Analyserede jobopslag</Text>
-
-        {jobPosts.length === 0 ? (
-          <View style={styles.emptyCard}>
-            <Text style={styles.emptyText}>
-              Du har ikke analyseret et opslag endnu. Gå tilbage og indsæt dit første jobopslag.
-            </Text>
-          </View>
-        ) : (
-          jobPosts
-            .slice()
-            .reverse()
-            .map((post) => (
-              <View key={post.id} style={styles.historyCard}>
-                <Text style={styles.historyDate}>{formatDate(post.id)}</Text>
-                <Text style={styles.historyPreview} numberOfLines={2}>
-                  {post.preview}
-                </Text>
-                <Text style={styles.historySkills}>
-                  Nøgleord: {post.skills.join(', ')}
-                </Text>
-              </View>
-            ))
-        )}
-      </ScrollView>
+      <FlatList
+        data={history}
+        keyExtractor={(item) => String(item.id)}
+        renderItem={renderItem}
+        ListHeaderComponent={renderHeader}
+        ListEmptyComponent={renderEmpty}
+        contentContainerStyle={styles.profileScroll}
+      />
 
       <View style={styles.bottomNav}>
         <TouchableOpacity style={styles.bottomNavItem} onPress={() => navigation.navigate('JobPost')}>

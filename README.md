@@ -33,4 +33,4 @@ npm run web      # åbn i browser
 
 1. Indsæt et jobopslag på forsiden og tryk **Analysér opslag**.
 2. Vælg en kategori (Brain Teasers, Adfærd, Faglig, Motivation) og besvar spørgsmålene.
-3. Tjek din progression og historik under 👤-fanen.
+3. Tjek din progression og historik under 👤-fanen evt
