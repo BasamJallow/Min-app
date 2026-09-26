@@ -62,6 +62,13 @@ export const styles = StyleSheet.create({
     backgroundColor: '#334155',
     borderBottomColor: '#1e293b',
   },
+  buttonSecondary: {
+    backgroundColor: '#334155',
+    borderBottomColor: '#1e293b',
+  },
+  buttonSecondaryText: {
+    color: TEXT,
+  },
   buttonText: {
     color: BG,
     textAlign: 'center',
@@ -453,6 +460,162 @@ export const styles = StyleSheet.create({
     fontSize: 12,
     color: MUTED,
     fontWeight: '700',
+  },
+
+  // Kompetenceoversigt på Categories-skærmen
+  competenceRow: {
+    flexDirection: 'row',
+    paddingHorizontal: 16,
+    paddingTop: 12,
+    paddingBottom: 4,
+  },
+  competenceCard: {
+    flex: 1,
+    backgroundColor: CARD,
+    borderRadius: 12,
+    borderWidth: 2,
+    borderColor: BORDER,
+    borderBottomWidth: 3,
+    paddingVertical: 10,
+    paddingHorizontal: 6,
+    marginHorizontal: 4,
+    alignItems: 'center',
+  },
+  competenceIcon: {
+    fontSize: 18,
+    marginBottom: 2,
+  },
+  competencePct: {
+    fontSize: 15,
+    fontWeight: '900',
+    color: LIME,
+    letterSpacing: -0.3,
+  },
+  competencePctEmpty: {
+    color: MUTED,
+  },
+  competenceLabel: {
+    fontSize: 10,
+    color: MUTED,
+    marginTop: 2,
+    fontWeight: '700',
+    letterSpacing: 0.4,
+    textTransform: 'uppercase',
+  },
+
+  // Resultatskærm
+  resultHero: {
+    alignItems: 'center',
+    paddingTop: 30,
+    paddingBottom: 20,
+  },
+  resultBadge: {
+    width: 130,
+    height: 130,
+    borderRadius: 65,
+    backgroundColor: LIME,
+    borderBottomWidth: 8,
+    borderBottomColor: LIME_DARK,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 20,
+  },
+  resultBadgeEmoji: {
+    fontSize: 60,
+  },
+  resultTitle: {
+    fontSize: 26,
+    fontWeight: '900',
+    color: TEXT,
+    letterSpacing: -0.5,
+  },
+  resultSub: {
+    fontSize: 14,
+    color: MUTED,
+    marginTop: 6,
+    textAlign: 'center',
+    paddingHorizontal: 30,
+  },
+  resultStatRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginTop: 8,
+    marginBottom: 20,
+  },
+  resultStat: {
+    flex: 1,
+    backgroundColor: CARD,
+    borderRadius: 16,
+    borderWidth: 2,
+    borderColor: BORDER,
+    borderBottomWidth: 4,
+    padding: 16,
+    alignItems: 'center',
+    marginHorizontal: 4,
+  },
+  resultStatValue: {
+    fontSize: 26,
+    fontWeight: '900',
+    color: LIME,
+  },
+  resultStatLabel: {
+    fontSize: 11,
+    color: MUTED,
+    marginTop: 4,
+    fontWeight: '800',
+    letterSpacing: 1,
+    textTransform: 'uppercase',
+  },
+  resultBreakdownItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: CARD,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: BORDER,
+    padding: 12,
+    marginBottom: 8,
+  },
+  resultBreakdownIcon: {
+    fontSize: 18,
+    marginRight: 10,
+  },
+  resultBreakdownText: {
+    flex: 1,
+    color: TEXT,
+    fontSize: 13,
+    lineHeight: 19,
+  },
+
+  // Historik-skærm
+  historyTitle: {
+    fontSize: 26,
+    fontWeight: '900',
+    color: TEXT,
+    marginTop: 4,
+    letterSpacing: -0.5,
+  },
+  historyScorePill: {
+    alignSelf: 'flex-start',
+    backgroundColor: '#1c2a1a',
+    borderRadius: 10,
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderWidth: 1,
+    borderColor: LIME_DARK,
+    marginTop: 8,
+  },
+  historyScoreText: {
+    color: LIME,
+    fontWeight: '900',
+    fontSize: 12,
+    letterSpacing: 0.4,
+  },
+  historyCategory: {
+    color: TEXT,
+    fontSize: 14,
+    fontWeight: '800',
+    marginTop: 2,
   },
 
   bottomNav: {

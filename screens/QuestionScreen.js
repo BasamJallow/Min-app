@@ -1,41 +1,87 @@
 import { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, ScrollView } from 'react-native';
 import { styles } from '../styles';
-import { evaluateFreeText } from '../questions';
+import { evaluateAnswer } from '../services/questionService';
+import { saveSession } from '../services/storageService';
 
-export default function QuestionScreen({ route, navigation, addXp, markComplete }) {
-  const { category, questions } = route.params;
+export default function QuestionScreen({ route, navigation }) {
+  const { category, categoryKey, questions, jobPreview } = route.params;
   const [index, setIndex] = useState(0);
   const [answer, setAnswer] = useState('');
   const [feedback, setFeedback] = useState(null);
+  const [breakdown, setBreakdown] = useState([]);
+  const [busy, setBusy] = useState(false);
 
   const question = questions[index];
   const isLast = index === questions.length - 1;
 
-  const finish = (result) => {
+  const commitEvaluation = (result) => {
     setFeedback(result);
-    addXp(result.xp);
-    markComplete(question.id);
+    setBreakdown((prev) => [
+      ...prev,
+      {
+        correct: !!result.correct,
+        xp: result.xp,
+        label: `${question.prompt.slice(0, 60)}${question.prompt.length > 60 ? '…' : ''}`,
+      },
+    ]);
   };
 
-  const handleChoice = (i) => {
-    if (feedback) return;
-    const correct = i === question.correct;
-    finish({
-      label: correct ? 'Stærkt svar' : 'Kan styrkes',
-      text: question.explanation,
-      xp: correct ? 20 : 5,
-    });
+  const handleFree = async () => {
+    if (answer.length < 5 || busy) return;
+    setBusy(true);
+    try {
+      const result = await evaluateAnswer(question, answer);
+      commitEvaluation(result);
+    } finally {
+      setBusy(false);
+    }
   };
 
-  const handleNext = () => {
-    if (isLast) {
-      navigation.goBack();
-    } else {
+  const handleChoice = async (i) => {
+    if (feedback || busy) return;
+    setBusy(true);
+    try {
+      const result = await evaluateAnswer(question, i);
+      commitEvaluation(result);
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const handleNext = async () => {
+    if (!isLast) {
       setIndex(index + 1);
       setAnswer('');
       setFeedback(null);
+      return;
     }
+
+    // Sidste spørgsmål — gem session og gå til Result.
+    const score = breakdown.filter((b) => b.correct).length;
+    const xpEarned = breakdown.reduce((sum, b) => sum + (b.xp || 0), 0);
+
+    const session = {
+      id: Date.now(),
+      date: Date.now(),
+      category,
+      categoryKey,
+      jobPreview,
+      score,
+      total: questions.length,
+      xp: xpEarned,
+    };
+    await saveSession(session);
+
+    navigation.replace('Result', {
+      category,
+      categoryKey,
+      score,
+      total: questions.length,
+      xp: xpEarned,
+      breakdown,
+      questions,
+    });
   };
 
   return (
@@ -58,11 +104,11 @@ export default function QuestionScreen({ route, navigation, addXp, markComplete 
           />
           {!feedback && (
             <TouchableOpacity
-              style={[styles.button, answer.length < 5 && styles.buttonDisabled]}
-              disabled={answer.length < 5}
-              onPress={() => finish(evaluateFreeText(answer))}
+              style={[styles.button, (answer.length < 5 || busy) && styles.buttonDisabled]}
+              disabled={answer.length < 5 || busy}
+              onPress={handleFree}
             >
-              <Text style={styles.buttonText}>Få feedback</Text>
+              <Text style={styles.buttonText}>{busy ? 'Vurderer…' : 'Få feedback'}</Text>
             </TouchableOpacity>
           )}
         </>
@@ -85,7 +131,7 @@ export default function QuestionScreen({ route, navigation, addXp, markComplete 
 
           <TouchableOpacity style={styles.button} onPress={handleNext}>
             <Text style={styles.buttonText}>
-              {isLast ? 'Tilbage til banen' : 'Næste spørgsmål'}
+              {isLast ? 'Se resultat' : 'Næste spørgsmål'}
             </Text>
           </TouchableOpacity>
         </View>

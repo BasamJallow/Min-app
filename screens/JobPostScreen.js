@@ -1,21 +1,27 @@
 import { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity } from 'react-native';
 import { styles } from '../styles';
-import { analyzeJobPost, generateQuestions } from '../questions';
+import { getQuestions } from '../services/questionService';
 
-export default function JobPostScreen({ navigation, addJobPost }) {
+export default function JobPostScreen({ navigation }) {
   const [text, setText] = useState('');
+  const [loading, setLoading] = useState(false);
 
-  const handleAnalyze = () => {
-    const skills = analyzeJobPost(text);
-    const questions = generateQuestions(skills);
-    addJobPost({
-      id: Date.now(),
-      preview: text.trim().slice(0, 100),
-      skills,
-    });
-    navigation.navigate('Categories', { skills, questions });
+  const handleAnalyze = async () => {
+    setLoading(true);
+    try {
+      const { skills, questions } = await getQuestions(text);
+      navigation.navigate('Categories', {
+        skills,
+        questions,
+        jobPreview: text.trim().slice(0, 100),
+      });
+    } finally {
+      setLoading(false);
+    }
   };
+
+  const disabled = text.length < 20 || loading;
 
   return (
     <View style={styles.container}>
@@ -33,11 +39,13 @@ export default function JobPostScreen({ navigation, addJobPost }) {
       />
 
       <TouchableOpacity
-        style={[styles.button, text.length < 20 && styles.buttonDisabled]}
-        disabled={text.length < 20}
+        style={[styles.button, disabled && styles.buttonDisabled]}
+        disabled={disabled}
         onPress={handleAnalyze}
       >
-        <Text style={styles.buttonText}>Analysér opslag</Text>
+        <Text style={styles.buttonText}>
+          {loading ? 'Analyserer…' : 'Analysér opslag'}
+        </Text>
       </TouchableOpacity>
     </View>
   );

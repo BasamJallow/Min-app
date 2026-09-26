@@ -1,6 +1,9 @@
+import { useCallback, useState } from 'react';
 import { View, Text, FlatList, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useFocusEffect } from '@react-navigation/native';
 import { styles } from '../styles';
+import { getSessions, getProgress } from '../services/storageService';
 
 function streakFromXp(xp) {
   return Math.floor(xp / 40);
@@ -15,12 +18,23 @@ function formatDate(ts) {
   return `${dd}/${mm} · ${hh}:${mi}`;
 }
 
-export default function ProfileScreen({ navigation, xp, completed, jobPosts }) {
-  const streak = streakFromXp(xp);
-  const done = completed.length;
-  const applied = jobPosts.length;
+export default function ProfileScreen({ navigation }) {
+  const [sessions, setSessions] = useState([]);
+  const [progress, setProgress] = useState({ perCategory: {}, xp: 0, sessions: 0 });
 
-  const history = jobPosts.slice().reverse();
+  useFocusEffect(useCallback(() => {
+    let alive = true;
+    Promise.all([getSessions(), getProgress()]).then(([s, p]) => {
+      if (!alive) return;
+      setSessions(s);
+      setProgress(p);
+    });
+    return () => { alive = false; };
+  }, []));
+
+  const xp = progress.xp;
+  const streak = streakFromXp(xp);
+  const recent = sessions.slice(0, 5);
 
   const renderHeader = () => (
     <>
@@ -42,35 +56,51 @@ export default function ProfileScreen({ navigation, xp, completed, jobPosts }) {
           <Text style={styles.statLabel}>Streak</Text>
         </View>
         <View style={styles.statCard}>
-          <Text style={styles.statValue}>{done}</Text>
-          <Text style={styles.statLabel}>Øvelser</Text>
+          <Text style={styles.statValue}>{progress.sessions}</Text>
+          <Text style={styles.statLabel}>Sessioner</Text>
         </View>
         <View style={styles.statCard}>
-          <Text style={styles.statValue}>{applied}</Text>
-          <Text style={styles.statLabel}>Opslag</Text>
+          <Text style={styles.statValue}>{Object.keys(progress.perCategory).length}</Text>
+          <Text style={styles.statLabel}>Kategorier</Text>
         </View>
       </View>
 
-      <Text style={styles.sectionHeader}>Analyserede jobopslag</Text>
+      <Text style={styles.sectionHeader}>Seneste sessioner</Text>
     </>
   );
 
   const renderEmpty = () => (
     <View style={styles.emptyCard}>
       <Text style={styles.emptyText}>
-        Du har ikke analyseret et opslag endnu. Gå tilbage og indsæt dit første jobopslag.
+        Ingen sessioner endnu. Indsæt et jobopslag og gennemfør en kategori for at komme i gang.
       </Text>
     </View>
   );
 
   const renderItem = ({ item }) => (
     <View style={styles.historyCard}>
-      <Text style={styles.historyDate}>{formatDate(item.id)}</Text>
+      <Text style={styles.historyDate}>{formatDate(item.date)}</Text>
+      <Text style={styles.historyCategory}>{item.category}</Text>
       <Text style={styles.historyPreview} numberOfLines={2}>
-        {item.preview}
+        {item.jobPreview || 'Uden jobopslag'}
       </Text>
-      <Text style={styles.historySkills}>Nøgleord: {item.skills.join(', ')}</Text>
+      <View style={styles.historyScorePill}>
+        <Text style={styles.historyScoreText}>
+          {item.score}/{item.total} rigtige · +{item.xp} XP
+        </Text>
+      </View>
     </View>
+  );
+
+  const renderFooter = () => (
+    sessions.length > recent.length ? (
+      <TouchableOpacity
+        style={styles.button}
+        onPress={() => navigation.navigate('History')}
+      >
+        <Text style={styles.buttonText}>Se al historik</Text>
+      </TouchableOpacity>
+    ) : null
   );
 
   return (
@@ -90,11 +120,12 @@ export default function ProfileScreen({ navigation, xp, completed, jobPosts }) {
       </View>
 
       <FlatList
-        data={history}
+        data={recent}
         keyExtractor={(item) => String(item.id)}
         renderItem={renderItem}
         ListHeaderComponent={renderHeader}
         ListEmptyComponent={renderEmpty}
+        ListFooterComponent={renderFooter}
         contentContainerStyle={styles.profileScroll}
       />
 
@@ -102,7 +133,7 @@ export default function ProfileScreen({ navigation, xp, completed, jobPosts }) {
         <TouchableOpacity style={styles.bottomNavItem} onPress={() => navigation.navigate('JobPost')}>
           <Text style={styles.bottomNavIcon}>🏠</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.bottomNavItem}>
+        <TouchableOpacity style={styles.bottomNavItem} onPress={() => navigation.navigate('History')}>
           <Text style={styles.bottomNavIcon}>📋</Text>
         </TouchableOpacity>
         <TouchableOpacity style={styles.bottomNavItem}>

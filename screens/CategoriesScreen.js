@@ -1,6 +1,9 @@
+import { useCallback, useState } from 'react';
 import { View, Text, ScrollView, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useFocusEffect } from '@react-navigation/native';
 import { styles } from '../styles';
+import { getProgress } from '../services/storageService';
 
 const CATEGORIES = [
   { key: 'brain', name: 'Brain Teasers', desc: 'Vis din tankeproces', icon: '🧠' },
@@ -15,18 +18,26 @@ function streakFromXp(xp) {
   return Math.floor(xp / 40);
 }
 
-export default function CategoriesScreen({ route, navigation, xp, completed }) {
-  const { skills, questions } = route.params;
+export default function CategoriesScreen({ route, navigation }) {
+  const { skills, questions, jobPreview } = route.params;
+  const [progress, setProgress] = useState({ perCategory: {}, xp: 0, sessions: 0 });
 
-  const progress = CATEGORIES.map((c) => {
-    const list = questions[c.key];
-    const done = list.filter((q) => completed.includes(q.id)).length;
-    return { ...c, list, done, total: list.length, allDone: done === list.length };
+  useFocusEffect(useCallback(() => {
+    let alive = true;
+    getProgress().then((p) => { if (alive) setProgress(p); });
+    return () => { alive = false; };
+  }, []));
+
+  const view = CATEGORIES.map((c) => {
+    const stat = progress.perCategory[c.key];
+    const pct = stat ? stat.pct : 0;
+    const done = stat && stat.sessions > 0;
+    return { ...c, list: questions[c.key], pct, done };
   });
 
-  const currentIndex = progress.findIndex((p) => !p.allDone);
-  const activeIndex = currentIndex === -1 ? progress.length - 1 : currentIndex;
-  const activeCategory = progress[activeIndex];
+  const nextIndex = view.findIndex((c) => !c.done);
+  const activeIndex = nextIndex === -1 ? 0 : nextIndex;
+  const activeCategory = view[activeIndex];
 
   return (
     <SafeAreaView style={styles.boardRoot} edges={['top', 'left', 'right']}>
@@ -35,11 +46,11 @@ export default function CategoriesScreen({ route, navigation, xp, completed }) {
         <View style={styles.hudStats}>
           <View style={styles.hudStat}>
             <Text style={styles.hudStatIcon}>🔥</Text>
-            <Text style={[styles.hudStatText, styles.hudFlameText]}>{streakFromXp(xp)}</Text>
+            <Text style={[styles.hudStatText, styles.hudFlameText]}>{streakFromXp(progress.xp)}</Text>
           </View>
           <View style={styles.hudStat}>
             <Text style={styles.hudStatIcon}>⭐</Text>
-            <Text style={[styles.hudStatText, styles.hudXpText]}>{xp}</Text>
+            <Text style={[styles.hudStatText, styles.hudXpText]}>{progress.xp}</Text>
           </View>
         </View>
       </View>
@@ -50,8 +61,21 @@ export default function CategoriesScreen({ route, navigation, xp, completed }) {
         <Text style={styles.bannerSub}>Nøgleord: {skills.join(', ')}</Text>
       </View>
 
+      {/* Kompetenceoversigt — procent pr. kategori på tværs af tidligere sessioner */}
+      <View style={styles.competenceRow}>
+        {view.map((c) => (
+          <View key={c.key} style={styles.competenceCard}>
+            <Text style={styles.competenceIcon}>{c.icon}</Text>
+            <Text style={[styles.competencePct, c.pct === 0 && styles.competencePctEmpty]}>
+              {c.pct}%
+            </Text>
+            <Text style={styles.competenceLabel}>{c.name.split(' ')[0]}</Text>
+          </View>
+        ))}
+      </View>
+
       <ScrollView contentContainerStyle={styles.path}>
-        {progress.map((cat, i) => {
+        {view.map((cat, i) => {
           const isActive = i === activeIndex;
           const offset = OFFSETS[i % OFFSETS.length];
 
@@ -68,18 +92,20 @@ export default function CategoriesScreen({ route, navigation, xp, completed }) {
                   onPress={() =>
                     navigation.navigate('Question', {
                       category: cat.name,
+                      categoryKey: cat.key,
                       questions: cat.list,
+                      jobPreview,
                     })
                   }
-                  style={[styles.node, cat.allDone && styles.nodeDone]}
+                  style={[styles.node, cat.done && styles.nodeDone]}
                 >
                   <Text style={styles.nodeIcon}>
-                    {cat.allDone ? '⭐' : cat.icon}
+                    {cat.done ? '⭐' : cat.icon}
                   </Text>
                 </TouchableOpacity>
                 <Text style={styles.nodeLabel}>{cat.name}</Text>
-                <Text style={[styles.nodeProgress, cat.allDone && styles.nodeProgressDone]}>
-                  {cat.done}/{cat.total}
+                <Text style={[styles.nodeProgress, cat.done && styles.nodeProgressDone]}>
+                  {cat.pct}%
                 </Text>
               </View>
             </View>
@@ -91,7 +117,7 @@ export default function CategoriesScreen({ route, navigation, xp, completed }) {
         <TouchableOpacity style={styles.bottomNavItem} onPress={() => navigation.navigate('JobPost')}>
           <Text style={[styles.bottomNavIcon, styles.bottomNavIconActive]}>🏠</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.bottomNavItem}>
+        <TouchableOpacity style={styles.bottomNavItem} onPress={() => navigation.navigate('History')}>
           <Text style={styles.bottomNavIcon}>📋</Text>
         </TouchableOpacity>
         <TouchableOpacity style={styles.bottomNavItem}>
