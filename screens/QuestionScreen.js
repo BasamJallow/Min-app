@@ -1,11 +1,13 @@
 import { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, ScrollView } from 'react-native';
+import { useRoute } from '@react-navigation/native';
 import { styles } from '../styles';
 import { evaluateAnswer } from '../services/questionService';
 import { saveSession } from '../services/storageService';
+import { breakdownItem, buildSession } from '../utils';
 
-export default function QuestionScreen({ route, navigation }) {
-  const { category, categoryKey, questions, jobPreview } = route.params;
+export default function QuestionScreen({ navigation }) {
+  const { jobId, skills, category, categoryKey, questions, jobPreview } = useRoute().params;
   const [index, setIndex] = useState(0);
   const [answer, setAnswer] = useState('');
   const [feedback, setFeedback] = useState(null);
@@ -17,21 +19,14 @@ export default function QuestionScreen({ route, navigation }) {
 
   const commitEvaluation = (result) => {
     setFeedback(result);
-    setBreakdown((prev) => [
-      ...prev,
-      {
-        correct: !!result.correct,
-        xp: result.xp,
-        label: `${question.prompt.slice(0, 60)}${question.prompt.length > 60 ? '…' : ''}`,
-      },
-    ]);
+    setBreakdown((prev) => [...prev, breakdownItem(question, result)]);
   };
 
   const handleFree = async () => {
     if (answer.length < 5 || busy) return;
     setBusy(true);
     try {
-      const result = await evaluateAnswer(question, answer);
+      const result = await evaluateAnswer(question, answer, skills);
       commitEvaluation(result);
     } finally {
       setBusy(false);
@@ -42,11 +37,17 @@ export default function QuestionScreen({ route, navigation }) {
     if (feedback || busy) return;
     setBusy(true);
     try {
-      const result = await evaluateAnswer(question, i);
+      const result = await evaluateAnswer(question, i, skills);
       commitEvaluation(result);
     } finally {
       setBusy(false);
     }
+  };
+
+  // Nyt forsøg på samme fritekstspørgsmål — kun det seneste forsøg tæller.
+  const handleRetry = () => {
+    setFeedback(null);
+    setBreakdown((prev) => prev.slice(0, -1));
   };
 
   const handleNext = async () => {
@@ -58,27 +59,20 @@ export default function QuestionScreen({ route, navigation }) {
     }
 
     // Sidste spørgsmål — gem session og gå til Result.
-    const score = breakdown.filter((b) => b.correct).length;
-    const xpEarned = breakdown.reduce((sum, b) => sum + (b.xp || 0), 0);
-
-    const session = {
-      id: Date.now(),
-      date: Date.now(),
-      category,
-      categoryKey,
-      jobPreview,
-      score,
-      total: questions.length,
-      xp: xpEarned,
-    };
+    const session = buildSession({
+      jobId, category, categoryKey, jobPreview, breakdown, total: questions.length,
+    });
     await saveSession(session);
 
     navigation.replace('Result', {
+      jobId,
+      skills,
       category,
       categoryKey,
-      score,
-      total: questions.length,
-      xp: xpEarned,
+      jobPreview,
+      score: session.score,
+      total: session.total,
+      xp: session.xp,
       breakdown,
       questions,
     });
@@ -134,6 +128,12 @@ export default function QuestionScreen({ route, navigation }) {
               {isLast ? 'Se resultat' : 'Næste spørgsmål'}
             </Text>
           </TouchableOpacity>
+
+          {question.type === 'free' && (
+            <TouchableOpacity style={[styles.button, styles.buttonSecondary]} onPress={handleRetry}>
+              <Text style={[styles.buttonText, styles.buttonSecondaryText]}>Prøv igen</Text>
+            </TouchableOpacity>
+          )}
         </View>
       )}
     </ScrollView>

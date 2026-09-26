@@ -10,8 +10,9 @@ export default function JobPostScreen({ navigation }) {
   const handleAnalyze = async () => {
     setLoading(true);
     try {
-      const { skills, questions } = await getQuestions(text);
+      const { jobId, skills, questions } = await getQuestions(text);
       navigation.navigate('Categories', {
+        jobId,
         skills,
         questions,
         jobPreview: text.trim().slice(0, 100),

@@ -1,25 +1,16 @@
 import { useCallback, useState } from 'react';
 import { View, Text, ScrollView, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useFocusEffect } from '@react-navigation/native';
+import { useFocusEffect, useRoute } from '@react-navigation/native';
 import { styles } from '../styles';
 import { getProgress } from '../services/storageService';
+import { CATEGORIES } from '../constants';
+import { streakFromXp } from '../utils';
 
-const CATEGORIES = [
-  { key: 'brain', name: 'Brain Teasers', desc: 'Vis din tankeproces', icon: '🧠' },
-  { key: 'behavior', name: 'Adfærd', desc: 'Træn STAR-metoden', icon: '💬' },
-  { key: 'professional', name: 'Faglig', desc: 'Kompetencer fra opslaget', icon: '💼' },
-  { key: 'motivation', name: 'Motivation', desc: 'Hvorfor lige dem?', icon: '💡' },
-];
+const OFFSET_STYLES = [styles.pathOffset0, styles.pathOffset1, styles.pathOffset2, styles.pathOffset3];
 
-const OFFSETS = [0, -70, 70, -40];
-
-function streakFromXp(xp) {
-  return Math.floor(xp / 40);
-}
-
-export default function CategoriesScreen({ route, navigation }) {
-  const { skills, questions, jobPreview } = route.params;
+export default function CategoriesScreen({ navigation }) {
+  const { jobId, skills, questions, jobPreview } = useRoute().params;
   const [progress, setProgress] = useState({ perCategory: {}, xp: 0, sessions: 0 });
 
   useFocusEffect(useCallback(() => {
@@ -58,10 +49,12 @@ export default function CategoriesScreen({ route, navigation }) {
       <View style={styles.banner}>
         <Text style={styles.bannerLabel}>SEKTION 1 · {activeCategory.name.toUpperCase()}</Text>
         <Text style={styles.bannerTitle}>Træn dit jobinterview</Text>
-        <Text style={styles.bannerSub}>Nøgleord: {skills.join(', ')}</Text>
+        <Text style={styles.bannerSub}>
+          {skills.length > 0 ? `Kompetencer: ${skills.join(', ')}` : 'Ingen specifikke kompetencer fundet'}
+        </Text>
       </View>
 
-      {/* Kompetenceoversigt — procent pr. kategori på tværs af tidligere sessioner */}
+      {/* Kompetenceoversigt — procent pr. kategori */}
       <View style={styles.competenceRow}>
         {view.map((c) => (
           <View key={c.key} style={styles.competenceCard}>
@@ -77,10 +70,9 @@ export default function CategoriesScreen({ route, navigation }) {
       <ScrollView contentContainerStyle={styles.path}>
         {view.map((cat, i) => {
           const isActive = i === activeIndex;
-          const offset = OFFSETS[i % OFFSETS.length];
 
           return (
-            <View key={cat.key} style={[styles.pathRow, { transform: [{ translateX: offset }] }]}>
+            <View key={cat.key} style={[styles.pathRow, OFFSET_STYLES[i % OFFSET_STYLES.length]]}>
               <View style={styles.nodeWrap}>
                 {isActive && (
                   <View style={styles.startPill}>
@@ -91,6 +83,8 @@ export default function CategoriesScreen({ route, navigation }) {
                   activeOpacity={0.7}
                   onPress={() =>
                     navigation.navigate('Question', {
+                      jobId,
+                      skills,
                       category: cat.name,
                       categoryKey: cat.key,
                       questions: cat.list,

@@ -4,19 +4,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useFocusEffect } from '@react-navigation/native';
 import { styles } from '../styles';
 import { getSessions, getProgress } from '../services/storageService';
-
-function streakFromXp(xp) {
-  return Math.floor(xp / 40);
-}
-
-function formatDate(ts) {
-  const d = new Date(ts);
-  const dd = String(d.getDate()).padStart(2, '0');
-  const mm = String(d.getMonth() + 1).padStart(2, '0');
-  const hh = String(d.getHours()).padStart(2, '0');
-  const mi = String(d.getMinutes()).padStart(2, '0');
-  return `${dd}/${mm} · ${hh}:${mi}`;
-}
+import { formatDate, streakFromXp } from '../utils';
 
 export default function ProfileScreen({ navigation }) {
   const [sessions, setSessions] = useState([]);

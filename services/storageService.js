@@ -1,8 +1,6 @@
-// Datalag for sessioner og progression.
-// Nu: gemmer lokalt via AsyncStorage.
-// Ved integration: skift indholdet i USE_MOCK-grenene ud med Firestore-kald
-// (fx addDoc / getDocs på en 'sessions'-collection under den loggede bruger).
-// Skærmene rører ikke ved dette — de kalder kun saveSession, getSessions, getProgress.
+// Datalag for sessioner og progression. Skærmene kalder kun saveSession, getSessions, getProgress.
+// Ved Firebase-integration: erstat USE_MOCK-grenene med Firestore-kald på en
+// 'sessions'-collection under den loggede bruger (addDoc, getDocs, where('jobId', '==', …)).
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { USE_MOCK } from '../config';
@@ -10,10 +8,9 @@ import { USE_MOCK } from '../config';
 const SESSIONS_KEY = 'preppal.sessions';
 
 async function readSessions() {
-  const raw = await AsyncStorage.getItem(SESSIONS_KEY);
-  if (!raw) return [];
   try {
-    return JSON.parse(raw);
+    const raw = await AsyncStorage.getItem(SESSIONS_KEY);
+    return raw ? JSON.parse(raw) : [];
   } catch {
     return [];
   }
@@ -22,8 +19,11 @@ async function readSessions() {
 export async function saveSession(session) {
   if (USE_MOCK) {
     const current = await readSessions();
-    const next = [...current, session];
-    await AsyncStorage.setItem(SESSIONS_KEY, JSON.stringify(next));
+    try {
+      await AsyncStorage.setItem(SESSIONS_KEY, JSON.stringify([...current, session]));
+    } catch {
+      // Gemning fejlede — brugeren kan stadig se sit resultat.
+    }
     return session;
   }
 
@@ -31,10 +31,10 @@ export async function saveSession(session) {
   throw new Error('Firebase er ikke koblet på endnu.');
 }
 
+// Nyeste først.
 export async function getSessions() {
   if (USE_MOCK) {
     const list = await readSessions();
-    // Nyeste først.
     return list.slice().sort((a, b) => b.date - a.date);
   }
 
@@ -42,11 +42,11 @@ export async function getSessions() {
   throw new Error('Firebase er ikke koblet på endnu.');
 }
 
-// Samler statistik pr. kategori og totalt XP.
-// Ved Firestore vil samme funktion aggregere over brugerens dokumenter.
-export async function getProgress() {
+// Statistik pr. kategori og samlet XP. Med jobId tælles kun det opslags sessioner.
+export async function getProgress(jobId) {
   if (USE_MOCK) {
-    const list = await readSessions();
+    const all = await readSessions();
+    const list = jobId ? all.filter((s) => s.jobId === jobId) : all;
     const perCategory = {};
     let xp = 0;
 
@@ -59,8 +59,7 @@ export async function getProgress() {
       perCategory[s.categoryKey] = bucket;
     }
 
-    for (const key of Object.keys(perCategory)) {
-      const b = perCategory[key];
+    for (const b of Object.values(perCategory)) {
       b.pct = b.total > 0 ? Math.round((b.correct / b.total) * 100) : 0;
     }
 
