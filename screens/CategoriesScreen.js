@@ -49,7 +49,9 @@ export default function CategoriesScreen({ navigation }) {
       <View style={styles.banner}>
         <Text style={styles.bannerLabel}>SEKTION 1 · {activeCategory.name.toUpperCase()}</Text>
         <Text style={styles.bannerTitle}>Træn dit jobinterview</Text>
-        <Text style={styles.bannerSub}>Nøgleord: {skills.join(', ')}</Text>
+        <Text style={styles.bannerSub}>
+          {skills.length > 0 ? `Kompetencer: ${skills.join(', ')}` : 'Ingen specifikke kompetencer fundet'}
+        </Text>
       </View>
 
       {/* Kompetenceoversigt — procent pr. kategori */}

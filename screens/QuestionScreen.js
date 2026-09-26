@@ -44,6 +44,12 @@ export default function QuestionScreen({ navigation }) {
     }
   };
 
+  // Nyt forsøg på samme fritekstspørgsmål — kun det seneste forsøg tæller.
+  const handleRetry = () => {
+    setFeedback(null);
+    setBreakdown((prev) => prev.slice(0, -1));
+  };
+
   const handleNext = async () => {
     if (!isLast) {
       setIndex(index + 1);
@@ -122,6 +128,12 @@ export default function QuestionScreen({ navigation }) {
               {isLast ? 'Se resultat' : 'Næste spørgsmål'}
             </Text>
           </TouchableOpacity>
+
+          {question.type === 'free' && (
+            <TouchableOpacity style={[styles.button, styles.buttonSecondary]} onPress={handleRetry}>
+              <Text style={[styles.buttonText, styles.buttonSecondaryText]}>Prøv igen</Text>
+            </TouchableOpacity>
+          )}
         </View>
       )}
     </ScrollView>
