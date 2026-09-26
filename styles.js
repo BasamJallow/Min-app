@@ -281,6 +281,11 @@ export const styles = StyleSheet.create({
     marginBottom: 34,
     alignItems: 'center',
   },
+  // Zigzag-forskydning af noderne på banen
+  pathOffset0: { transform: [{ translateX: 0 }] },
+  pathOffset1: { transform: [{ translateX: -70 }] },
+  pathOffset2: { transform: [{ translateX: 70 }] },
+  pathOffset3: { transform: [{ translateX: -40 }] },
   nodeWrap: {
     alignItems: 'center',
   },

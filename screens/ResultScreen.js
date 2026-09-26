@@ -1,20 +1,20 @@
 import { View, Text, ScrollView, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useRoute } from '@react-navigation/native';
 import { styles } from '../styles';
+import { badgeFor, percent } from '../utils';
 
-function badgeFor(pct) {
-  if (pct >= 80) return { emoji: '🏆', title: 'Fremragende!', sub: 'Du er klar til samtalen.' };
-  if (pct >= 50) return { emoji: '💪', title: 'Godt gået', sub: 'Der er stadig plads til at skærpe et par svar.' };
-  return { emoji: '📚', title: 'Godt forsøg', sub: 'Kør kategorien igen — gentagelse gør stor forskel.' };
-}
-
-export default function ResultScreen({ route, navigation }) {
-  const { category, categoryKey, score, total, xp, breakdown, questions } = route.params;
-  const pct = total > 0 ? Math.round((score / total) * 100) : 0;
+export default function ResultScreen({ navigation }) {
+  const {
+    jobId, skills, category, categoryKey, jobPreview, score, total, xp, breakdown, questions,
+  } = useRoute().params;
+  const pct = percent(score, total);
   const badge = badgeFor(pct);
 
   const retry = () => {
-    navigation.replace('Question', { category, categoryKey, questions });
+    navigation.replace('Question', {
+      jobId, skills, category, categoryKey, questions, jobPreview,
+    });
   };
 
   const backToBoard = () => {

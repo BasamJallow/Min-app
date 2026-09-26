@@ -1,27 +1,27 @@
-// Datalag for spørgsmål og evaluering.
-// Nu: bruger den regelbaserede motor i /questions.js.
-// Ved integration: skift indholdet i USE_MOCK-grenene ud med et rigtigt API-kald
-// (fx OpenAI/Anthropic via AI_API-konfigurationen i /config.js).
-// Skærmene rører ikke ved dette — de kalder kun getQuestions og evaluateAnswer.
+// Datalag for spørgsmål og evaluering. Skærmene kalder kun getQuestions og evaluateAnswer.
+// Ved API-integration: erstat USE_MOCK-grenene med kald til AI_API fra /config.js
+// og slet /questions.js. Signaturer og returformat skal bevares.
 
 import { USE_MOCK } from '../config';
 import { analyzeJobPost, generateQuestions, evaluateFreeText } from '../questions';
 
+// Returnerer { jobId, skills, questions }. jobId knytter sessioner til netop dette opslag.
 export async function getQuestions(jobPost) {
   if (USE_MOCK) {
     const skills = analyzeJobPost(jobPost);
     const questions = generateQuestions(skills);
-    return { skills, questions };
+    return { jobId: String(Date.now()), skills, questions };
   }
 
   // TODO: kald AI-API her når nøglen er sat op.
   throw new Error('AI-API er ikke koblet på endnu.');
 }
 
-export async function evaluateAnswer(question, answer) {
+// Returnerer { label, text, xp, correct }. skills er kompetencerne fundet i opslaget.
+export async function evaluateAnswer(question, answer, skills = []) {
   if (USE_MOCK) {
     if (question.type === 'free') {
-      return evaluateFreeText(answer);
+      return evaluateFreeText(answer, skills);
     }
     const correct = answer === question.correct;
     return {
