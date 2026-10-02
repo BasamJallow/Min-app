@@ -7,7 +7,9 @@ import { AI_API } from '../config';
 const TIMEOUT_MS = 45000;
 
 // Loft over hvor langt et svar må blive, så en fejl ikke kan bruge løs af tokens.
-const MAX_TOKENS = { analyze: 6000, evaluate: 800, strong: 700 };
+const MAX_TOKENS = {
+  analyze: 6000, evaluate: 800, strong: 700, interviewTurn: 400, interviewSummary: 900,
+};
 
 // Sender en prompt og returnerer modellens svar som et JSON-objekt.
 async function chatJson(system, user, maxTokens, label) {
@@ -118,4 +120,48 @@ export async function strongAnswerWithAI(question, answer, skills) {
     svar: answer,
   });
   return chatJson(STRONG_SYSTEM, user, MAX_TOKENS.strong, 'stærkt svar');
+}
+
+// Opslagets tekst begrænses, så lange opslag ikke koster unødige tokens i hver tur.
+const MAX_POST_CHARS = 3000;
+
+const INTERVIEW_SYSTEM = `Du er en erfaren dansk interviewer hos virksomheden i jobopslaget og holder en realistisk jobsamtale.
+- Du er høflig, men krævende: du nøjes ikke med vage eller generelle svar.
+- Stil ét spørgsmål ad gangen, kort (1-3 sætninger), i talesprog.
+- Giv ingen feedback eller ros undervejs — højst en kort, neutral kvittering som "Tak." eller "Okay."
+- Opfølgning: spørg ind, når svaret mangler en konkret handling, et resultat, eller undviger spørgsmålet.
+- Nye spørgsmål dækker forskellige kompetencer fra opslaget og blander adfærd, faglighed og motivation.
+- Følg altid feltet "tilladt": det bestemmer, om du må følge op, stille et nyt hovedspørgsmål eller skal afslutte.
+- Første replik: byd kort velkommen og stil første spørgsmål.
+- Afslutning: tak for samtalen i 1-2 sætninger uden at vurdere kandidaten.
+Svar KUN med JSON: {"type":"followup" | "question" | "closing","message":"din replik"}`;
+
+function interviewInput(context, messages, extra) {
+  return JSON.stringify({
+    titel: context.title || null,
+    opslag: (context.text || '').slice(0, MAX_POST_CHARS),
+    kompetencer: context.skills,
+    samtale: messages.map((m) => ({ fra: m.role === 'candidate' ? 'kandidat' : 'interviewer', tekst: m.text })),
+    ...extra,
+  });
+}
+
+export async function interviewTurnWithAI(context, messages, allowed) {
+  const user = interviewInput(context, messages, { tilladt: allowed });
+  return chatJson(INTERVIEW_SYSTEM, user, MAX_TOKENS.interviewTurn, 'interview');
+}
+
+const INTERVIEW_SUMMARY_SYSTEM = `Du er en dansk interviewcoach. Vurdér kandidatens præstation i jobsamtalen realistisk — ikke for venligt.
+Vurder: konkrete eksempler, STAR (situation, handling, resultat), kobling til opslagets kompetencer og motivation.
+Svar KUN med JSON:
+{"score": <heltal 0-100>,
+ "summary": "2-3 sætninger til kandidaten med 'du'",
+ "strengths": ["2-3 konkrete styrker"],
+ "improvements": ["2-3 konkrete forbedringer"],
+ "strong": ["kompetencer fra opslaget kandidaten viste"],
+ "weak": ["kompetencer fra opslaget kandidaten ikke viste"]}`;
+
+export async function interviewSummaryWithAI(context, messages) {
+  const user = interviewInput(context, messages, {});
+  return chatJson(INTERVIEW_SUMMARY_SYSTEM, user, MAX_TOKENS.interviewSummary, 'interview-vurdering');
 }

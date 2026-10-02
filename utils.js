@@ -21,6 +21,12 @@ export function badgeFor(pct) {
   return { emoji: '📚', title: 'Godt forsøg', sub: 'Kør kategorien igen — gentagelse gør stor forskel.' };
 }
 
+// Renser en liste fra et AI-svar til ikke-tomme tekster.
+export function stringList(value, max) {
+  if (!Array.isArray(value)) return [];
+  return value.filter((v) => typeof v === 'string' && v.trim()).map((v) => v.trim()).slice(0, max);
+}
+
 export function percent(score, total) {
   return total > 0 ? Math.round((score / total) * 100) : 0;
 }

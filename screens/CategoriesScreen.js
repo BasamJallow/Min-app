@@ -4,7 +4,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useFocusEffect, useRoute } from '@react-navigation/native';
 import { styles } from '../styles';
 import { getProgress } from '../services/storageService';
-import { CATEGORIES } from '../constants';
+import { CATEGORIES, INTERVIEW } from '../constants';
 import { streakFromXp, readiness, goTo } from '../utils';
 
 const OFFSET_STYLES = [styles.pathOffset0, styles.pathOffset1, styles.pathOffset2, styles.pathOffset3];
@@ -79,6 +79,17 @@ export default function CategoriesScreen({ navigation }) {
           </View>
         ))}
       </View>
+
+      <TouchableOpacity
+        style={styles.interviewCard}
+        activeOpacity={0.8}
+        onPress={() => navigation.navigate('Interview', { jobId, skills, questions, jobPreview })}
+      >
+        <Text style={styles.interviewCardTitle}>🎤 Prøv en rigtig samtale</Text>
+        <Text style={styles.interviewCardSub}>
+          {INTERVIEW.mainQuestions} spørgsmål med opfølgning — som til en rigtig jobsamtale
+        </Text>
+      </TouchableOpacity>
 
       <ScrollView contentContainerStyle={styles.path}>
         {view.map((cat, i) => {

@@ -9,6 +9,7 @@ import ProfileScreen from './screens/ProfileScreen';
 import ResultScreen from './screens/ResultScreen';
 import HistoryScreen from './screens/HistoryScreen';
 import JobsScreen from './screens/JobsScreen';
+import InterviewScreen from './screens/InterviewScreen';
 
 const Stack = createNativeStackNavigator();
 
@@ -24,6 +25,7 @@ export default function App() {
           <Stack.Screen name="Profile" component={ProfileScreen} options={{ headerShown: false }} />
           <Stack.Screen name="History" component={HistoryScreen} options={{ headerShown: false }} />
           <Stack.Screen name="Jobs" component={JobsScreen} options={{ title: 'Mine opslag' }} />
+          <Stack.Screen name="Interview" component={InterviewScreen} options={{ title: 'Jobsamtale' }} />
         </Stack.Navigator>
       </NavigationContainer>
     </SafeAreaProvider>

@@ -10,14 +10,11 @@ import {
 } from '../questions';
 import { analyzeWithAI, evaluateWithAI, strongAnswerWithAI } from './aiService';
 import { analysisKey, getCachedAnalysis, saveCachedAnalysis } from './cacheService';
+import { stringList } from '../utils';
 
 const LABEL_XP = { 'Stærkt svar': 20, 'Godt forsøg': 12, 'Kan styrkes': 5 };
 const MIN_PER_CATEGORY = 3;
 
-function stringList(value, max) {
-  if (!Array.isArray(value)) return [];
-  return value.filter((v) => typeof v === 'string' && v.trim()).map((v) => v.trim()).slice(0, max);
-}
 
 // Sorterer ugyldige spørgsmål fra, så skærmene altid får det format, de forventer.
 function cleanQuestion(q, categoryKey, skills) {

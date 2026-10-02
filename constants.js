@@ -8,6 +8,13 @@ export const CATEGORIES = [
   { key: 'brain', name: 'Brain Teasers', desc: 'Vis din tankeproces', icon: '🧠', weight: 0.75 },
 ];
 
+// Interview-simulatoren: antal hovedspørgsmål og opfølgninger pr. spørgsmål.
+export const INTERVIEW = {
+  mainQuestions: 4,
+  maxFollowUps: 1,
+  xpPerPoint: 0.8,
+};
+
 // Afstand til navigationsbaren på iOS, så tastaturet ikke dækker tekstfelter.
 export const KEYBOARD_OFFSET = 90;
 

@@ -249,6 +249,96 @@ export const styles = StyleSheet.create({
     color: '#cbd5e1',
   },
 
+  // Interview-simulator
+  interviewCard: {
+    marginHorizontal: 20,
+    marginTop: 10,
+    backgroundColor: CARD,
+    borderRadius: 16,
+    borderWidth: 2,
+    borderColor: LIME_DARK,
+    borderBottomWidth: 5,
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+  },
+  interviewCardTitle: {
+    color: LIME,
+    fontSize: 16,
+    fontWeight: '900',
+  },
+  interviewCardSub: {
+    color: MUTED,
+    fontSize: 13,
+    marginTop: 2,
+  },
+  interviewTopBar: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: BORDER,
+    backgroundColor: BG,
+  },
+  interviewProgress: {
+    color: LIME,
+    fontSize: 12,
+    fontWeight: '900',
+    textTransform: 'uppercase',
+    letterSpacing: 1.2,
+  },
+  interviewEnd: {
+    color: CORAL,
+    fontSize: 14,
+    fontWeight: '800',
+  },
+  chatList: {
+    padding: 16,
+    paddingBottom: 24,
+  },
+  bubble: {
+    maxWidth: '85%',
+    borderRadius: 18,
+    paddingVertical: 10,
+    paddingHorizontal: 14,
+    marginBottom: 10,
+  },
+  bubbleInterviewer: {
+    alignSelf: 'flex-start',
+    backgroundColor: CARD,
+    borderWidth: 1,
+    borderColor: BORDER,
+    borderBottomLeftRadius: 4,
+  },
+  bubbleCandidate: {
+    alignSelf: 'flex-end',
+    backgroundColor: LIME,
+    borderBottomRightRadius: 4,
+  },
+  bubbleLabel: {
+    color: MUTED,
+    fontSize: 11,
+    fontWeight: '800',
+    textTransform: 'uppercase',
+    letterSpacing: 0.8,
+    marginBottom: 2,
+  },
+  bubbleText: {
+    color: TEXT,
+    fontSize: 15,
+    lineHeight: 22,
+  },
+  bubbleTextCandidate: {
+    color: BG,
+  },
+  chatInput: {
+    height: 90,
+    minHeight: 90,
+    marginBottom: 0,
+    marginTop: 6,
+  },
+
   // "Se et stærkt svar" i feedbackboksen
   strongBox: {
     marginTop: 16,

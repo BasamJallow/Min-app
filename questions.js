@@ -166,8 +166,10 @@ function joinDa(list) {
 function detectStar(lower) {
   return {
     situation: hasAny(lower, STAR_MARKERS.situation),
-    // Datid efter "jeg" (fx "jeg lavede", "jeg hjalp") tæller også som handling.
-    action: hasAny(lower, STAR_MARKERS.action) || /(^|\s)jeg \S+(ede|te|de)\b/.test(lower),
+    // Datid ved "jeg" tæller også som handling — både "jeg lavede" og omvendt ordstilling "lavede jeg".
+    action: hasAny(lower, STAR_MARKERS.action)
+      || /(^|\s)jeg \S+(ede|te|de)\b/.test(lower)
+      || /\S+(ede|te|de) jeg\b/.test(lower),
     result: hasAny(lower, STAR_MARKERS.result) || /\d/.test(lower),
   };
 }
@@ -548,4 +550,54 @@ export function generateQuestions(skills) {
   };
 
   return bank;
+}
+
+// ---------- Interview-simulator (lokal motor) ----------
+
+const INTERVIEW_FALLBACK = [
+  'Fortæl kort om dig selv, og hvorfor du søger denne stilling.',
+  'Fortæl om en situation, hvor du stod over for en svær opgave. Hvad gjorde du?',
+  'Hvad er din største faglige styrke, og hvordan har du brugt den?',
+  'Fortæl om en gang, hvor noget ikke gik som planlagt. Hvad lærte du?',
+  'Hvorfor skal vi vælge dig frem for de andre kandidater?',
+];
+
+// Vælger hovedspørgsmål: skiftevis adfærd, faglig og motivation, kun fritekst.
+export function interviewPlan(bank, count) {
+  const pools = ['behavior', 'professional', 'motivation']
+    .map((key) => (bank?.[key] || []).filter((q) => q.type === 'free'));
+  const plan = [];
+  for (let i = 0; plan.length < count && i < 10; i++) {
+    for (const pool of pools) {
+      if (pool[i] && plan.length < count) plan.push(pool[i]);
+    }
+  }
+  for (const prompt of INTERVIEW_FALLBACK) {
+    if (plan.length >= count) break;
+    plan.push({ type: 'free', category: 'behavior', star: true, prompt });
+  }
+  return plan;
+}
+
+// Opfølgning, når svaret er vagt. null betyder, at svaret er godt nok til at gå videre.
+export function interviewFollowUp(answer, question) {
+  const lower = answer.toLowerCase();
+  const words = answer.trim().split(/\s+/).filter(Boolean).length;
+  const star = detectStar(lower);
+  if (words < 20) return 'Kan du uddybe det med et konkret eksempel?';
+  // Motivation handler om "hvorfor" — der giver handling og resultat ikke mening.
+  if (question?.category === 'motivation') return null;
+  if (!star.action) return 'Hvad gjorde du helt konkret selv — ikke teamet, men dig?';
+  if (!star.result) return 'Hvad blev resultatet? Kan du sætte tal på?';
+  return null;
+}
+
+// Tæller manglende STAR-dele på tværs af svar — bruges i den lokale samlede vurdering.
+export function starGaps(answers) {
+  const gaps = { situation: 0, action: 0, result: 0 };
+  for (const a of answers) {
+    const star = detectStar(a.toLowerCase());
+    for (const key of Object.keys(gaps)) if (!star[key]) gaps[key] += 1;
+  }
+  return gaps;
 }

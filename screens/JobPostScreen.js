@@ -37,7 +37,7 @@ export default function JobPostScreen({ navigation }) {
       }
       setNotJobPost(false);
       const preview = text.trim().slice(0, 100);
-      await saveJob({ jobId, date: Date.now(), title, preview, skills, questions });
+      await saveJob({ jobId, date: Date.now(), title, preview, text: text.trim(), skills, questions });
       navigation.navigate('Categories', { jobId, skills, questions, jobPreview: preview });
     } finally {
       setLoading(false);
