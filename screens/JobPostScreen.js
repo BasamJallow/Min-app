@@ -53,8 +53,9 @@ export default function JobPostScreen({ navigation }) {
         </Text>
 
         <TextInput
-          style={styles.input}
+          style={[styles.input, styles.inputJobPost]}
           multiline
+          scrollEnabled
           placeholder="Indsæt teksten fra jobopslaget her…"
           placeholderTextColor={palette.MUTED}
           value={text}
@@ -62,6 +63,24 @@ export default function JobPostScreen({ navigation }) {
           editable={!loading}
         />
 
+        {notJobPost && !loading && (
+          <View style={styles.warningBox}>
+            <Text style={styles.warningTitle}>Det ligner ikke et jobopslag</Text>
+            <Text style={styles.warningText}>
+              Indsæt hele opslaget med opgaver og krav, så spørgsmålene passer til stillingen.
+            </Text>
+            <TouchableOpacity
+              style={[styles.button, styles.buttonSecondary]}
+              onPress={() => handleAnalyze(true)}
+            >
+              <Text style={[styles.buttonText, styles.buttonSecondaryText]}>Fortsæt alligevel</Text>
+            </TouchableOpacity>
+          </View>
+        )}
+      </ScrollView>
+
+      {/* Fast bund, så knapperne altid kan ses — uanset hvor langt opslaget er */}
+      <View style={styles.footer}>
         {loading ? (
           <View style={styles.loadingBox}>
             <ActivityIndicator size="large" color={palette.LIME} />
@@ -70,21 +89,6 @@ export default function JobPostScreen({ navigation }) {
           </View>
         ) : (
           <>
-            {notJobPost && (
-              <View style={styles.warningBox}>
-                <Text style={styles.warningTitle}>Det ligner ikke et jobopslag</Text>
-                <Text style={styles.warningText}>
-                  Indsæt hele opslaget med opgaver og krav, så spørgsmålene passer til stillingen.
-                </Text>
-                <TouchableOpacity
-                  style={[styles.button, styles.buttonSecondary]}
-                  onPress={() => handleAnalyze(true)}
-                >
-                  <Text style={[styles.buttonText, styles.buttonSecondaryText]}>Fortsæt alligevel</Text>
-                </TouchableOpacity>
-              </View>
-            )}
-
             <TouchableOpacity
               style={[styles.button, disabled && styles.buttonDisabled]}
               disabled={disabled}
@@ -101,7 +105,7 @@ export default function JobPostScreen({ navigation }) {
             </TouchableOpacity>
           </>
         )}
-      </ScrollView>
+      </View>
     </KeyboardAvoidingView>
   );
 }

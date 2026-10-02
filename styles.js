@@ -55,6 +55,18 @@ export const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: BG,
   },
+  // Fast højde på opslagsfeltet — iOS respekterer ikke altid maxHeight på multiline-felter.
+  inputJobPost: {
+    height: 220,
+  },
+  footer: {
+    paddingHorizontal: 20,
+    paddingTop: 6,
+    paddingBottom: 28,
+    borderTopWidth: 1,
+    borderTopColor: BORDER,
+    backgroundColor: BG,
+  },
   warningBox: {
     backgroundColor: CARD,
     borderRadius: 16,
