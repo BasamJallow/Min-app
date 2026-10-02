@@ -6,8 +6,11 @@ import { AI_API } from '../config';
 
 const TIMEOUT_MS = 45000;
 
+// Loft over hvor langt et svar må blive, så en fejl ikke kan bruge løs af tokens.
+const MAX_TOKENS = { analyze: 6000, evaluate: 800 };
+
 // Sender en prompt og returnerer modellens svar som et JSON-objekt.
-async function chatJson(system, user) {
+async function chatJson(system, user, maxTokens, label) {
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), TIMEOUT_MS);
   try {
@@ -20,6 +23,7 @@ async function chatJson(system, user) {
       body: JSON.stringify({
         model: AI_API.model,
         response_format: { type: 'json_object' },
+        max_completion_tokens: maxTokens,
         messages: [
           { role: 'system', content: system },
           { role: 'user', content: user },
@@ -32,7 +36,14 @@ async function chatJson(system, user) {
       throw new Error(`OpenAI svarede ${res.status}: ${body.slice(0, 200)}`);
     }
     const data = await res.json();
-    return JSON.parse(data.choices[0].message.content);
+    const { prompt_tokens: input = 0, completion_tokens: output = 0 } = data.usage || {};
+    console.log(`OpenAI (${label}): ${input} ind / ${output} ud tokens`);
+
+    const choice = data.choices[0];
+    if (choice.finish_reason === 'length') {
+      throw new Error(`Svaret ramte loftet på ${maxTokens} tokens`);
+    }
+    return JSON.parse(choice.message.content);
   } finally {
     clearTimeout(timer);
   }
@@ -62,7 +73,7 @@ Regler:
 - Bland fritekst og multiple choice i alle kategorier. Skriv alt på dansk.`;
 
 export async function analyzeWithAI(jobPost) {
-  return chatJson(ANALYZE_SYSTEM, `Jobopslag:\n"""\n${jobPost}\n"""`);
+  return chatJson(ANALYZE_SYSTEM, `Jobopslag:\n"""\n${jobPost}\n"""`, MAX_TOKENS.analyze, 'analyse');
 }
 
 const EVALUATE_SYSTEM = `Du er en dansk interviewcoach. Du vurderer kandidatens svar på et øvelsesspørgsmål.
@@ -82,5 +93,5 @@ export async function evaluateWithAI(question, answer, skills) {
     opslagets_kompetencer: skills,
     svar: answer,
   });
-  return chatJson(EVALUATE_SYSTEM, user);
+  return chatJson(EVALUATE_SYSTEM, user, MAX_TOKENS.evaluate, 'feedback');
 }

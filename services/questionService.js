@@ -3,10 +3,11 @@
 // Fejler AI-kaldet, falder vi tilbage til motoren, så appen altid virker.
 // Ved Firebase-integration: behold signaturerne — kun aiService skal pege på en Cloud Function.
 
-import { USE_MOCK_AI } from '../config';
+import { USE_MOCK_AI, AI_API } from '../config';
 import { CATEGORIES } from '../constants';
 import { analyzeJobPost, generateQuestions, evaluateFreeText, skillNote } from '../questions';
 import { analyzeWithAI, evaluateWithAI } from './aiService';
+import { analysisKey, getCachedAnalysis, saveCachedAnalysis } from './cacheService';
 
 const LABEL_XP = { 'Stærkt svar': 20, 'Godt forsøg': 12, 'Kan styrkes': 5 };
 const MIN_PER_CATEGORY = 3;
@@ -57,6 +58,19 @@ function mockQuestions(jobPost) {
 }
 
 async function aiQuestions(jobPost) {
+  // Samme opslag analyseres kun én gang — derefter hentes det fra cachen uden tokenforbrug.
+  const key = analysisKey(jobPost, AI_API.model);
+  const cached = await getCachedAnalysis(key);
+  if (cached) {
+    console.log('OpenAI (analyse): hentet fra cache, 0 tokens');
+    return cached;
+  }
+  const result = await analyzeAndClean(jobPost);
+  await saveCachedAnalysis(key, result);
+  return result;
+}
+
+async function analyzeAndClean(jobPost) {
   const data = await analyzeWithAI(jobPost);
   const skills = stringList(data.skills, 5).map((s) => s.toLowerCase());
   const fallback = generateQuestions(skills);
