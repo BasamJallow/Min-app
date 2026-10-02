@@ -291,7 +291,7 @@ export function strongAnswerTemplate(question, answer, skills = []) {
   if (question.category === 'motivation') {
     return {
       text: 'Det, der gør, at jeg søger netop her, er [noget specifikt ved virksomheden]. '
-        + `Det hænger sammen med, at jeg [din erfaring], og jeg glæder mig til at arbejde med ${skill} `
+        + `Det hænger sammen med, at jeg [din erfaring], og jeg glæder mig til at bruge mine styrker inden for ${skill} `
         + 'i [en konkret opgave fra opslaget].',
       changes: [
         'Nævner noget specifikt ved virksomheden',

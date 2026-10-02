@@ -79,3 +79,17 @@ export function buildSession({ jobId, category, categoryKey, jobPreview, breakdo
     ...skillSummary(breakdown),
   };
 }
+
+// I React Navigation 7 åbner navigate() en NY skærm, hvis den ikke er den aktuelle.
+// goTo går i stedet tilbage til skærmen, hvis den allerede ligger i stakken, og bevarer dens data.
+export function goTo(navigation, name, params) {
+  const inStack = navigation.getState().routes.some((r) => r.name === name);
+  if (inStack) navigation.popTo(name, params, { merge: true });
+  else navigation.navigate(name, params);
+}
+
+// Tilbage til den åbne bane — eller til "Mine opslag", hvis der ikke er nogen.
+export function goToBoard(navigation) {
+  const hasBoard = navigation.getState().routes.some((r) => r.name === 'Categories');
+  goTo(navigation, hasBoard ? 'Categories' : 'Jobs');
+}

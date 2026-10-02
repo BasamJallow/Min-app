@@ -5,7 +5,7 @@ import { useFocusEffect, useRoute } from '@react-navigation/native';
 import { styles } from '../styles';
 import { getProgress } from '../services/storageService';
 import { CATEGORIES } from '../constants';
-import { streakFromXp, readiness } from '../utils';
+import { streakFromXp, readiness, goTo } from '../utils';
 
 const OFFSET_STYLES = [styles.pathOffset0, styles.pathOffset1, styles.pathOffset2, styles.pathOffset3];
 
@@ -121,10 +121,10 @@ export default function CategoriesScreen({ navigation }) {
       </ScrollView>
 
       <View style={styles.bottomNav}>
-        <TouchableOpacity style={styles.bottomNavItem} onPress={() => navigation.navigate('JobPost')}>
+        <TouchableOpacity style={styles.bottomNavItem} onPress={() => goTo(navigation, 'JobPost')}>
           <Text style={styles.bottomNavIcon}>🏠</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.bottomNavItem} onPress={() => navigation.navigate('History')}>
+        <TouchableOpacity style={styles.bottomNavItem} onPress={() => goTo(navigation, 'History')}>
           <Text style={styles.bottomNavIcon}>📋</Text>
         </TouchableOpacity>
         <TouchableOpacity style={styles.bottomNavItem}>
@@ -132,7 +132,7 @@ export default function CategoriesScreen({ navigation }) {
         </TouchableOpacity>
         <TouchableOpacity
           style={styles.bottomNavItem}
-          onPress={() => navigation.navigate('Profile')}
+          onPress={() => goTo(navigation, 'Profile')}
         >
           <Text style={styles.bottomNavIcon}>👤</Text>
         </TouchableOpacity>
