@@ -5,7 +5,9 @@
 
 import { USE_MOCK_AI, AI_API } from '../config';
 import { CATEGORIES } from '../constants';
-import { analyzeJobPost, generateQuestions, evaluateFreeText, skillNote } from '../questions';
+import {
+  analyzeJobPost, generateQuestions, evaluateFreeText, skillNote, looksLikeJobPost,
+} from '../questions';
 import { analyzeWithAI, evaluateWithAI } from './aiService';
 import { analysisKey, getCachedAnalysis, saveCachedAnalysis } from './cacheService';
 
@@ -54,7 +56,7 @@ function withCategoryMeta(bank) {
 
 function mockQuestions(jobPost) {
   const skills = analyzeJobPost(jobPost);
-  return { skills, bank: generateQuestions(skills) };
+  return { isJobPost: looksLikeJobPost(jobPost, skills), skills, bank: generateQuestions(skills) };
 }
 
 async function aiQuestions(jobPost) {
@@ -72,6 +74,8 @@ async function aiQuestions(jobPost) {
 
 async function analyzeAndClean(jobPost) {
   const data = await analyzeWithAI(jobPost);
+  // Ikke et jobopslag — gemmes i cachen, så samme tekst ikke koster tokens igen.
+  if (data.isJobPost === false) return { isJobPost: false };
   const skills = stringList(data.skills, 5).map((s) => s.toLowerCase());
   const fallback = generateQuestions(skills);
   const bank = {};
@@ -81,11 +85,13 @@ async function analyzeAndClean(jobPost) {
     // For få brugbare spørgsmål fra AI — brug motorens i den kategori.
     bank[c.key] = clean.length >= MIN_PER_CATEGORY ? clean : fallback[c.key];
   }
-  return { skills, bank };
+  return { isJobPost: true, skills, bank };
 }
 
-// Returnerer { jobId, skills, questions }. jobId knytter sessioner til netop dette opslag.
-export async function getQuestions(jobPost) {
+// Returnerer { isJobPost, jobId, skills, questions }. jobId knytter sessioner til netop dette opslag.
+// Ligner teksten ikke et jobopslag, returneres kun { isJobPost: false } — medmindre force er sat,
+// så brugeren kan fortsætte med generelle spørgsmål.
+export async function getQuestions(jobPost, { force = false } = {}) {
   let result;
   if (USE_MOCK_AI) {
     result = mockQuestions(jobPost);
@@ -97,7 +103,19 @@ export async function getQuestions(jobPost) {
       result = mockQuestions(jobPost);
     }
   }
-  return { jobId: String(Date.now()), skills: result.skills, questions: withCategoryMeta(result.bank) };
+
+  // Ældre cache-poster har ikke feltet og regnes som jobopslag.
+  if (result.isJobPost === false) {
+    if (!force) return { isJobPost: false };
+    // AI sendte ingen spørgsmål for en tekst, der ikke er et opslag — brug motorens generelle.
+    if (!result.bank) result = mockQuestions(jobPost);
+  }
+  return {
+    isJobPost: true,
+    jobId: String(Date.now()),
+    skills: result.skills,
+    questions: withCategoryMeta(result.bank),
+  };
 }
 
 // Kategoriens vægt ganges på XP, så adfærd tæller mere end brain teasers.

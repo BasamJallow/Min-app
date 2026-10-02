@@ -50,8 +50,11 @@ async function chatJson(system, user, maxTokens, label) {
 }
 
 const ANALYZE_SYSTEM = `Du er en dansk karriererådgiver, der forbereder en kandidat til en jobsamtale.
-Du får et jobopslag og svarer KUN med JSON i dette format:
+Du får en tekst, der burde være et jobopslag. Svar KUN med JSON.
+Hvis teksten tydeligvis IKKE er et jobopslag, så svar kun: {"isJobPost": false}
+Ellers svar i dette format:
 {
+  "isJobPost": true,
   "skills": ["kompetence", ...],
   "questions": {
     "behavior": [ ... ],

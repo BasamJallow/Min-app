@@ -26,7 +26,7 @@ const SKILLS = [
     label: 'ledelse',
     // Hverken "leder" eller "ledelse" alene — "Vi leder efter…" og "rapportere til ledelsen" er ikke lederroller.
     matchLabel: false,
-    synonyms: ['ledelseserfaring', 'ledelsesansvar', 'lederrolle', 'lederskab', 'teamleder', 'ledende', 'leadership', 'personaleansvar', 'motivere'],
+    synonyms: ['ledelseserfaring', 'ledelsesansvar', 'og ledelse', 'ledelse og', 'lederstilling', 'driftsleder', 'butikschef', 'lederrolle', 'lederskab', 'teamleder', 'ledende', 'leadership', 'personaleansvar', 'motivere'],
     behavior: 'Fortæl om en gang, hvor du tog føringen i en gruppe uden at have fået rollen formelt.',
     professional: 'Hvordan får du en gruppe til at trække i samme retning? Giv et eksempel, hvor du gjorde det.',
   },
@@ -111,6 +111,16 @@ function mentionsSkill(lower, label) {
   const skill = skillByLabel(label);
   const stems = skill ? stemsFor(skill) : [label];
   return stems.some((stem) => countStem(lower, stem) > 0);
+}
+
+const JOB_WORDS = ['stilling', 'job', 'ansøg', 'søger', 'opgaver', 'kvalifikation', 'erfaring', 'ansættelse',
+  'arbejdsplads', 'kollega', 'vi tilbyder', 'position', 'we are looking', 'responsibilit', 'requirements', 'apply'];
+
+// Groft tjek af om teksten ligner et jobopslag: kompetencer fundet, eller typiske jobord.
+export function looksLikeJobPost(text, skills) {
+  const lower = text.toLowerCase();
+  const jobWords = JOB_WORDS.filter((w) => countStem(lower, w) > 0).length;
+  return skills.length > 0 || jobWords >= 2;
 }
 
 // Returnerer kompetencerne i opslaget, sorteret efter hvor tit de nævnes. Tom liste hvis ingen.

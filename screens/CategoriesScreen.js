@@ -73,7 +73,9 @@ export default function CategoriesScreen({ navigation }) {
             <Text style={[styles.competencePct, c.pct === 0 && styles.competencePctEmpty]}>
               {c.pct}%
             </Text>
-            <Text style={styles.competenceLabel}>{c.name.split(' ')[0]}</Text>
+            <Text style={styles.competenceLabel} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.7}>
+              {c.name.split(' ')[0]}
+            </Text>
           </View>
         ))}
       </View>

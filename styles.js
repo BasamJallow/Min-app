@@ -43,6 +43,8 @@ export const styles = StyleSheet.create({
     borderRadius: 16,
     padding: 16,
     minHeight: 130,
+    // Lange tekster scroller inde i feltet, så knapperne under altid kan ses.
+    maxHeight: 240,
     textAlignVertical: 'top',
     fontSize: 16,
     color: TEXT,
@@ -52,6 +54,25 @@ export const styles = StyleSheet.create({
   keyboardRoot: {
     flex: 1,
     backgroundColor: BG,
+  },
+  warningBox: {
+    backgroundColor: CARD,
+    borderRadius: 16,
+    borderWidth: 2,
+    borderColor: FLAME,
+    padding: 16,
+    marginBottom: 6,
+  },
+  warningTitle: {
+    color: FLAME,
+    fontSize: 16,
+    fontWeight: '900',
+    marginBottom: 4,
+  },
+  warningText: {
+    color: TEXT,
+    fontSize: 14,
+    lineHeight: 20,
   },
   loadingBox: {
     alignItems: 'center',

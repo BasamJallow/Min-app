@@ -10,12 +10,23 @@ import { EXAMPLE_JOB_POST, KEYBOARD_OFFSET } from '../constants';
 export default function JobPostScreen({ navigation }) {
   const [text, setText] = useState('');
   const [loading, setLoading] = useState(false);
+  const [notJobPost, setNotJobPost] = useState(false);
 
-  const handleAnalyze = async () => {
+  const handleChange = (value) => {
+    setText(value);
+    setNotJobPost(false);
+  };
+
+  const handleAnalyze = async (force = false) => {
     Keyboard.dismiss();
     setLoading(true);
     try {
-      const { jobId, skills, questions } = await getQuestions(text);
+      const { isJobPost, jobId, skills, questions } = await getQuestions(text, { force });
+      if (!isJobPost) {
+        setNotJobPost(true);
+        return;
+      }
+      setNotJobPost(false);
       navigation.navigate('Categories', {
         jobId,
         skills,
@@ -47,7 +58,7 @@ export default function JobPostScreen({ navigation }) {
           placeholder="Indsæt teksten fra jobopslaget her…"
           placeholderTextColor={palette.MUTED}
           value={text}
-          onChangeText={setText}
+          onChangeText={handleChange}
           editable={!loading}
         />
 
@@ -59,17 +70,32 @@ export default function JobPostScreen({ navigation }) {
           </View>
         ) : (
           <>
+            {notJobPost && (
+              <View style={styles.warningBox}>
+                <Text style={styles.warningTitle}>Det ligner ikke et jobopslag</Text>
+                <Text style={styles.warningText}>
+                  Indsæt hele opslaget med opgaver og krav, så spørgsmålene passer til stillingen.
+                </Text>
+                <TouchableOpacity
+                  style={[styles.button, styles.buttonSecondary]}
+                  onPress={() => handleAnalyze(true)}
+                >
+                  <Text style={[styles.buttonText, styles.buttonSecondaryText]}>Fortsæt alligevel</Text>
+                </TouchableOpacity>
+              </View>
+            )}
+
             <TouchableOpacity
               style={[styles.button, disabled && styles.buttonDisabled]}
               disabled={disabled}
-              onPress={handleAnalyze}
+              onPress={() => handleAnalyze()}
             >
               <Text style={styles.buttonText}>Analysér opslag</Text>
             </TouchableOpacity>
 
             <TouchableOpacity
               style={[styles.button, styles.buttonSecondary]}
-              onPress={() => setText(EXAMPLE_JOB_POST)}
+              onPress={() => handleChange(EXAMPLE_JOB_POST)}
             >
               <Text style={[styles.buttonText, styles.buttonSecondaryText]}>Prøv med eksempel</Text>
             </TouchableOpacity>
