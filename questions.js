@@ -1,8 +1,6 @@
 // Regelbaseret mock-motor: simulerer AI-analyse af jobopslaget og genererer spørgsmål.
 // Bruges af services/questionService.js — det er dét lag skærmene taler med.
-// Når et rigtigt API kobles på, kan denne fil fjernes uden at røre skærmene.
-
-import { CATEGORIES } from './constants';
+// Bruges når der ikke er en OpenAI-nøgle, og som reserve hvis AI-kaldet fejler.
 
 // Kompetenceordbog. Synonymer er ordstammer på dansk og engelsk og matches fra ordets start.
 const SKILLS = [
@@ -449,10 +447,5 @@ export function generateQuestions(skills) {
     ],
   };
 
-  // Hvert spørgsmål får sin kategori og kategoriens vægt med.
-  const result = {};
-  for (const c of CATEGORIES) {
-    result[c.key] = bank[c.key].map((q) => ({ ...q, category: c.key, weight: c.weight }));
-  }
-  return result;
+  return bank;
 }

@@ -20,6 +20,17 @@ npm install
 npm start
 ```
 
+### AI-feedback med OpenAI (valgfrit)
+
+Uden nøgle kører appen på en lokal regelbaseret motor. Sådan slår du OpenAI til:
+
+1. Kopiér `.env.example` til en ny fil, der hedder `.env`
+2. Indsæt nøglen efter `EXPO_PUBLIC_OPENAI_API_KEY=`
+3. Genstart med `npx expo start -c`
+
+`.env` står i `.gitignore` og må aldrig committes. Tjek med `git status`, at den ikke dukker op.
+Nøglen bliver bygget ind i appen, så den er kun til test — del ikke builds med nøglen i.
+
 Scan QR-koden med Expo Go (Android) eller Kamera-appen (iOS) for at åbne appen på din telefon.
 
 Alternativt:

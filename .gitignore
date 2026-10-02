@@ -30,8 +30,10 @@ yarn-error.*
 .DS_Store
 *.pem
 
-# local env files
-.env*.local
+# local env files — her ligger API-nøglen, den må aldrig committes
+.env
+.env*
+!.env.example
 
 # typescript
 *.tsbuildinfo

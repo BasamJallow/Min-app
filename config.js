@@ -1,8 +1,5 @@
-// Central konfiguration.
-// Nøgler bliver liggende tomme her — udfyldes ved deploy eller via miljøvariabler.
-// Skift USE_MOCK til false når Firebase/API er sat op.
-
-export const USE_MOCK = true;
+// Central konfiguration. Nøgler læses fra .env (se .env.example) og står aldrig i koden.
+// USE_MOCK slår automatisk fra, når der er en OpenAI-nøgle i .env.
 
 export const firebaseConfig = {
   apiKey: '',
@@ -13,8 +10,11 @@ export const firebaseConfig = {
   appId: '',
 };
 
-// Nøgle til det AI-API der senere skal evaluere fritekstsvar.
+// Expo indsætter kun EXPO_PUBLIC_-variabler, og kun når de skrives helt ud som her.
 export const AI_API = {
-  endpoint: '',
-  apiKey: '',
+  endpoint: 'https://api.openai.com/v1/chat/completions',
+  apiKey: process.env.EXPO_PUBLIC_OPENAI_API_KEY || '',
+  model: process.env.EXPO_PUBLIC_OPENAI_MODEL || 'gpt-4o-mini',
 };
+
+export const USE_MOCK = !AI_API.apiKey;
