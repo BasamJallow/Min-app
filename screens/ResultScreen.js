@@ -2,7 +2,7 @@ import { View, Text, ScrollView, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRoute } from '@react-navigation/native';
 import { styles } from '../styles';
-import { badgeFor, percent } from '../utils';
+import { badgeFor, percent, skillSummary } from '../utils';
 
 export default function ResultScreen({ navigation }) {
   const {
@@ -10,6 +10,8 @@ export default function ResultScreen({ navigation }) {
   } = useRoute().params;
   const pct = percent(score, total);
   const badge = badgeFor(pct);
+  const summary = skillSummary(breakdown);
+  const hasSkills = summary.strong.length + summary.weak.length > 0;
 
   const retry = () => {
     navigation.replace('Question', {
@@ -49,7 +51,29 @@ export default function ResultScreen({ navigation }) {
           </View>
         </View>
 
-        <Text style={styles.categoryTag}>{category} · opsamling</Text>
+        <Text style={styles.categoryTag}>Kompetencer fra opslaget</Text>
+        {hasSkills ? (
+          <>
+            {summary.strong.map((s) => (
+              <View key={`s-${s}`} style={styles.resultBreakdownItem}>
+                <Text style={styles.resultBreakdownIcon}>✅</Text>
+                <Text style={styles.resultBreakdownText}>Stærk: {s}</Text>
+              </View>
+            ))}
+            {summary.weak.map((s) => (
+              <View key={`w-${s}`} style={styles.resultBreakdownItem}>
+                <Text style={styles.resultBreakdownIcon}>⚠️</Text>
+                <Text style={styles.resultBreakdownText}>Skal styrkes: {s}</Text>
+              </View>
+            ))}
+          </>
+        ) : (
+          <View style={[styles.emptyCard, styles.resultEmpty]}>
+            <Text style={styles.emptyText}>Ingen kompetencer blev vurderet i denne kategori.</Text>
+          </View>
+        )}
+
+        <Text style={[styles.categoryTag, styles.resultSectionGap]}>{category} · opsamling</Text>
 
         {breakdown.map((item, i) => (
           <View key={i} style={styles.resultBreakdownItem}>

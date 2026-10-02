@@ -181,7 +181,7 @@ function evaluateBrain(lower, words) {
     : 'Sig dine antagelser højt, fx "Jeg antager, at…" — det er dem, intervieweren vurderer.');
   if (!steps) lines.push('Bryd problemet ned i trin: først, derefter, til sidst.');
   if (!numbers) lines.push('Sæt tal på undervejs, også selvom de er grove skøn.');
-  return { ...rate(points), text: lines.join(' ') };
+  return { ...rate(points), text: lines.join(' '), strong: [], weak: [] };
 }
 
 // Vurderer kompetencedækning og (for adfærd) STAR. skills er opslagets kompetencer.
@@ -234,7 +234,12 @@ function evaluateAgainstPost(lower, words, question, skills) {
   points += lengthPoints(words);
   if (words < 15) lines.push('Svaret er meget kort — uddyb det.');
 
-  return { ...rate(points), text: lines.join(' ') };
+  // Svag = spørgsmålets kompetence mangler, eller svaret rammer ingen af opslagets.
+  let weak = [];
+  if (target && !covered.includes(target)) weak = [target];
+  else if (!target && covered.length === 0) weak = missing.slice(0, 2);
+
+  return { ...rate(points), text: lines.join(' '), strong: covered, weak };
 }
 
 export function evaluateFreeText(answer, question, skills = []) {
@@ -312,6 +317,11 @@ export function generateQuestions(skills) {
         ],
         correct: 1,
         explanation: 'Antagelser gør dine tanker sporbare, og de kan udfordres — det er dét intervieweren vurderer.',
+      },
+      {
+        id: 'b6', type: 'free',
+        prompt: 'Hvor mange cykler holder der parkeret ved Nørreport Station en hverdag kl. 9? Tænk højt.',
+        hint: 'Start med antal pendlere, og hvor stor en andel der cykler.',
       },
     ],
     behavior: [
@@ -443,6 +453,24 @@ export function generateQuestions(skills) {
         ],
         correct: 1,
         explanation: 'Interviewerne vil se retning og modenhed — ikke en detaljeret karriereplan.',
+      },
+      {
+        id: 'm5', type: 'free', skill,
+        prompt: skill
+          ? `Hvorfor motiverer det dig at arbejde med ${skill}, som opslaget lægger vægt på?`
+          : 'Hvilken del af jobbet glæder du dig mest til, og hvorfor?',
+        hint: 'Kobl det til noget, du konkret har gjort eller lært.',
+      },
+      {
+        id: 'm6', type: 'choice',
+        prompt: 'Du bliver spurgt om din lønforventning. Hvad er stærkest?',
+        options: [
+          'Siger at du tager, hvad de tilbyder.',
+          'Nævner et realistisk spænd baseret på fx din fagforenings lønstatistik.',
+          'Nævner et meget højt tal for at have noget at forhandle med.',
+        ],
+        correct: 1,
+        explanation: 'Et begrundet spænd viser, at du har undersøgt markedet, og giver plads til forhandling.',
       },
     ],
   };

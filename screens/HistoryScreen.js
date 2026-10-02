@@ -4,7 +4,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useFocusEffect } from '@react-navigation/native';
 import { styles } from '../styles';
 import { getSessions } from '../services/storageService';
-import { formatDate } from '../utils';
+import { formatDate, percent } from '../utils';
 
 export default function HistoryScreen({ navigation }) {
   const [sessions, setSessions] = useState([]);
@@ -41,7 +41,7 @@ export default function HistoryScreen({ navigation }) {
       </Text>
       <View style={styles.historyScorePill}>
         <Text style={styles.historyScoreText}>
-          {item.score}/{item.total} rigtige · +{item.xp} XP
+          {percent(item.score, item.total)}% · {item.score}/{item.total} rigtige · +{item.xp} XP
         </Text>
       </View>
     </View>
@@ -65,7 +65,7 @@ export default function HistoryScreen({ navigation }) {
         <TouchableOpacity style={styles.bottomNavItem}>
           <Text style={[styles.bottomNavIcon, styles.bottomNavIconActive]}>📋</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.bottomNavItem}>
+        <TouchableOpacity style={styles.bottomNavItem} onPress={() => navigation.navigate('Categories')}>
           <Text style={styles.bottomNavIcon}>💪</Text>
         </TouchableOpacity>
         <TouchableOpacity style={styles.bottomNavItem} onPress={() => navigation.navigate('Profile')}>

@@ -119,7 +119,7 @@ async function aiFreeText(question, answer, skills) {
   };
 }
 
-// Returnerer { label, text, xp, correct }. skills er kompetencerne fundet i opslaget.
+// Returnerer { label, text, xp, correct, strong, weak }. skills er kompetencerne fundet i opslaget.
 export async function evaluateAnswer(question, answer, skills = []) {
   let result;
   if (question.type === 'choice') {
@@ -130,6 +130,8 @@ export async function evaluateAnswer(question, answer, skills = []) {
       text: question.explanation + skillNote(question),
       xp: correct ? 20 : 5,
       correct,
+      strong: question.skill && correct ? [question.skill] : [],
+      weak: question.skill && !correct ? [question.skill] : [],
     };
   } else if (USE_MOCK_AI) {
     result = evaluateFreeText(answer, question, skills);

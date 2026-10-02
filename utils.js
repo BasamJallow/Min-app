@@ -1,5 +1,7 @@
 // Små hjælpefunktioner, så skærmene kun står for visning.
 
+import { CATEGORIES } from './constants';
+
 export function formatDate(ts) {
   const d = new Date(ts);
   const dd = String(d.getDate()).padStart(2, '0');
@@ -26,7 +28,39 @@ export function percent(score, total) {
 // Én linje i opsamlingen efter et besvaret spørgsmål.
 export function breakdownItem(question, result) {
   const short = question.prompt.length > 60 ? `${question.prompt.slice(0, 60)}…` : question.prompt;
-  return { correct: !!result.correct, xp: result.xp, label: short };
+  return {
+    correct: !!result.correct,
+    xp: result.xp,
+    label: short,
+    strong: result.strong || [],
+    weak: result.weak || [],
+  };
+}
+
+// Samler stærke og svage kompetencer på tværs af en kategori.
+// En kompetence er stærk, hvis den oftere blev vist end den manglede.
+export function skillSummary(breakdown) {
+  const tally = {};
+  for (const item of breakdown) {
+    for (const s of item.strong || []) tally[s] = (tally[s] || 0) + 1;
+    for (const s of item.weak || []) tally[s] = (tally[s] || 0) - 1;
+  }
+  const skills = Object.keys(tally);
+  return {
+    strong: skills.filter((s) => tally[s] > 0),
+    weak: skills.filter((s) => tally[s] <= 0),
+  };
+}
+
+// Vægtet gennemsnit af alle kategorier — ikke-gennemførte tæller som 0 %.
+export function readiness(perCategory) {
+  let sum = 0;
+  let weights = 0;
+  for (const c of CATEGORIES) {
+    sum += (perCategory[c.key]?.pct || 0) * c.weight;
+    weights += c.weight;
+  }
+  return weights > 0 ? Math.round(sum / weights) : 0;
 }
 
 // Samler en gennemført kategori til det objekt, storageService gemmer.
@@ -42,5 +76,6 @@ export function buildSession({ jobId, category, categoryKey, jobPreview, breakdo
     score: breakdown.filter((b) => b.correct).length,
     total,
     xp: breakdown.reduce((sum, b) => sum + (b.xp || 0), 0),
+    ...skillSummary(breakdown),
   };
 }

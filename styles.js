@@ -263,6 +263,12 @@ export const styles = StyleSheet.create({
     color: BG,
     letterSpacing: -0.4,
   },
+  bannerReadiness: {
+    fontSize: 13,
+    color: BG,
+    marginTop: 4,
+    fontWeight: '900',
+  },
   bannerSub: {
     fontSize: 13,
     color: LIME_DARK,
@@ -570,6 +576,12 @@ export const styles = StyleSheet.create({
     fontWeight: '800',
     letterSpacing: 1,
     textTransform: 'uppercase',
+  },
+  resultEmpty: {
+    marginBottom: 8,
+  },
+  resultSectionGap: {
+    marginTop: 18,
   },
   resultBreakdownItem: {
     flexDirection: 'row',
