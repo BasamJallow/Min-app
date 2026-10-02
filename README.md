@@ -28,7 +28,7 @@ Uden nøgle kører appen på en lokal regelbaseret motor. Sådan slår du OpenAI
 2. Indsæt nøglen efter `EXPO_PUBLIC_OPENAI_API_KEY=`
 3. Genstart med `npx expo start -c`
 
-**Tale i jobsamtalen:** Med nøglen kan du svare med stemmen (🎙️) i jobsamtalen. Intervieweren læser op med telefonens stemme som standard; tryk på "Telefonstemme" for at skifte til OpenAIs mere naturlige stemme. Første gang spørger telefonen om adgang til mikrofonen.
+**Tale i jobsamtalen:** Med nøglen starter jobsamtalen i "Tal frit": intervieweren taler, og når du holder en kort pause, sender appen dit svar automatisk. Skift til "💬 Chat" for at skrive eller svare med 🎙️ i stedet. Intervieweren læser op med telefonens stemme som standard; tryk på "Telefonstemme" for at skifte til OpenAIs mere naturlige stemme. Første gang spørger telefonen om adgang til mikrofonen.
 
 `.env` står i `.gitignore` og må aldrig committes. Tjek med `git status`, at den ikke dukker op.
 Nøglen bliver bygget ind i appen, så den er kun til test — del ikke builds med nøglen i.

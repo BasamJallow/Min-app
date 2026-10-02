@@ -359,6 +359,7 @@ export const styles = StyleSheet.create({
     marginHorizontal: 12,
   },
   voicePill: {
+    marginLeft: 6,
     borderWidth: 1,
     borderColor: BORDER,
     borderRadius: 10,
@@ -369,6 +370,82 @@ export const styles = StyleSheet.create({
     color: MUTED,
     fontSize: 11,
     fontWeight: '800',
+  },
+  // "Tal frit" i jobsamtalen
+  talkRoot: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 24,
+  },
+  talkAvatar: {
+    width: 150,
+    height: 150,
+    borderRadius: 75,
+    backgroundColor: CARD,
+    borderWidth: 4,
+    borderColor: BORDER,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 20,
+  },
+  talkAvatarSpeaking: {
+    borderColor: LIME,
+    borderWidth: 8,
+  },
+  talkAvatarListening: {
+    borderColor: CORAL,
+    borderWidth: 8,
+  },
+  talkAvatarIcon: {
+    fontSize: 64,
+  },
+  talkPhase: {
+    color: TEXT,
+    fontSize: 20,
+    fontWeight: '900',
+    marginBottom: 14,
+    textAlign: 'center',
+  },
+  talkTimer: {
+    color: MUTED,
+    fontSize: 14,
+    fontWeight: '800',
+    marginTop: 8,
+  },
+  talkCaption: {
+    color: MUTED,
+    fontSize: 15,
+    lineHeight: 22,
+    textAlign: 'center',
+    fontStyle: 'italic',
+    marginTop: 18,
+  },
+  talkButtons: {
+    alignSelf: 'stretch',
+    marginTop: 24,
+  },
+  talkLink: {
+    color: MUTED,
+    fontSize: 14,
+    fontWeight: '800',
+    textAlign: 'center',
+    marginTop: 16,
+  },
+  meterRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-end',
+    height: 40,
+  },
+  meterBar: {
+    width: 14,
+    height: 40,
+    borderRadius: 7,
+    marginHorizontal: 4,
+    backgroundColor: BORDER,
+  },
+  meterBarActive: {
+    backgroundColor: CORAL,
   },
   micButton: {
     backgroundColor: LIME,
