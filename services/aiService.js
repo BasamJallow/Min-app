@@ -8,7 +8,7 @@ const TIMEOUT_MS = 45000;
 
 // Loft over hvor langt et svar må blive, så en fejl ikke kan bruge løs af tokens.
 const MAX_TOKENS = {
-  analyze: 6000, evaluate: 800, strong: 700, interviewTurn: 400, interviewSummary: 900,
+  analyze: 6000, evaluate: 800, strong: 700, interviewTurn: 400, interviewSummary: 900, weakness: 1500,
 };
 
 // Sender en prompt og returnerer modellens svar som et JSON-objekt.
@@ -164,4 +164,23 @@ Svar KUN med JSON:
 export async function interviewSummaryWithAI(context, messages) {
   const user = interviewInput(context, messages, {});
   return chatJson(INTERVIEW_SUMMARY_SYSTEM, user, MAX_TOKENS.interviewSummary, 'interview-vurdering');
+}
+
+const WEAKNESS_SYSTEM = `Du er en dansk karriererådgiver. Kandidaten skal træne de kompetencer fra jobopslaget, som kandidaten har klaret dårligst.
+Lav nye øvelsesspørgsmål, der kun handler om de svage kompetencer og passer til stillingen.
+- Kun fritekstspørgsmål. Mest adfærd (STAR), gerne ét fagligt.
+- Undgå spørgsmålene i "allerede_stillet".
+- Skriv på dansk, kort og konkret.
+Svar KUN med JSON:
+{"questions":[{"type":"free","category":"behavior" | "professional","prompt":"...","hint":"kort tip","skill":"en af de svage kompetencer"}]}`;
+
+export async function weaknessQuestionsWithAI(context, weakSkills, count, alreadyAsked) {
+  const user = JSON.stringify({
+    titel: context.title || null,
+    opslag: (context.text || '').slice(0, MAX_POST_CHARS),
+    svage_kompetencer: weakSkills,
+    antal: count,
+    allerede_stillet: alreadyAsked.slice(0, 20),
+  });
+  return chatJson(WEAKNESS_SYSTEM, user, MAX_TOKENS.weakness, 'svage punkter');
 }

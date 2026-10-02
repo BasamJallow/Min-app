@@ -3,8 +3,9 @@ import { View, Text, ScrollView, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useFocusEffect, useRoute } from '@react-navigation/native';
 import { styles } from '../styles';
-import { getProgress } from '../services/storageService';
-import { CATEGORIES, INTERVIEW } from '../constants';
+import { getProgress, getWeakSkills, getJob } from '../services/storageService';
+import { getWeaknessQuestions } from '../services/questionService';
+import { CATEGORIES, INTERVIEW, WEAKNESS } from '../constants';
 import { streakFromXp, readiness, goTo } from '../utils';
 
 const OFFSET_STYLES = [styles.pathOffset0, styles.pathOffset1, styles.pathOffset2, styles.pathOffset3];
@@ -12,13 +13,38 @@ const OFFSET_STYLES = [styles.pathOffset0, styles.pathOffset1, styles.pathOffset
 export default function CategoriesScreen({ navigation }) {
   const { jobId, skills, questions, jobPreview } = useRoute().params;
   const [progress, setProgress] = useState({ perCategory: {}, xp: 0, sessions: 0 });
+  const [weak, setWeak] = useState({ sessions: 0, weak: [] });
+  const [weakLoading, setWeakLoading] = useState(false);
 
   useFocusEffect(useCallback(() => {
     let alive = true;
     // Kun dette opslags sessioner — et nyt opslag starter på en frisk bane.
-    getProgress(jobId).then((p) => { if (alive) setProgress(p); });
+    Promise.all([getProgress(jobId), getWeakSkills(jobId)]).then(([p, w]) => {
+      if (!alive) return;
+      setProgress(p);
+      setWeak(w);
+    });
     return () => { alive = false; };
   }, [jobId]));
+
+  const startWeakness = async () => {
+    if (weak.weak.length === 0 || weakLoading) return;
+    setWeakLoading(true);
+    try {
+      const job = (await getJob(jobId)) || { questions };
+      const list = await getWeaknessQuestions(job, weak.weak);
+      navigation.navigate('Question', {
+        jobId, skills, category: 'Svage punkter', categoryKey: 'weakness', questions: list, jobPreview,
+      });
+    } finally {
+      setWeakLoading(false);
+    }
+  };
+
+  let weakText = 'Gennemfør en kategori først';
+  if (weakLoading) weakText = 'Finder spørgsmål…';
+  else if (weak.weak.length > 0) weakText = weak.weak.join(' · ');
+  else if (weak.sessions > 0) weakText = 'Ingen svage punkter lige nu 💪';
 
   const view = CATEGORIES.map((c) => {
     const stat = progress.perCategory[c.key];
@@ -80,16 +106,30 @@ export default function CategoriesScreen({ navigation }) {
         ))}
       </View>
 
-      <TouchableOpacity
-        style={styles.interviewCard}
-        activeOpacity={0.8}
-        onPress={() => navigation.navigate('Interview', { jobId, skills, questions, jobPreview })}
-      >
-        <Text style={styles.interviewCardTitle}>🎤 Prøv en rigtig samtale</Text>
-        <Text style={styles.interviewCardSub}>
-          {INTERVIEW.mainQuestions} spørgsmål med opfølgning — som til en rigtig jobsamtale
-        </Text>
-      </TouchableOpacity>
+      <View style={styles.actionRow}>
+        <TouchableOpacity
+          style={styles.actionCard}
+          activeOpacity={0.8}
+          onPress={() => navigation.navigate('Interview', { jobId, skills, questions, jobPreview })}
+        >
+          <Text style={styles.actionCardTitle}>🎤 Jobsamtale</Text>
+          <Text style={styles.actionCardSub} numberOfLines={2}>
+            {INTERVIEW.mainQuestions} spørgsmål med opfølgning
+          </Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={[styles.actionCard, weak.weak.length === 0 && styles.actionCardDisabled]}
+          activeOpacity={0.8}
+          disabled={weak.weak.length === 0 || weakLoading}
+          onPress={startWeakness}
+        >
+          <Text style={styles.actionCardTitle}>🎯 Svage punkter</Text>
+          <Text style={styles.actionCardSub} numberOfLines={2}>
+            {weak.weak.length > 0 && !weakLoading ? `${WEAKNESS.questions} spørgsmål: ${weakText}` : weakText}
+          </Text>
+        </TouchableOpacity>
+      </View>
 
       <ScrollView contentContainerStyle={styles.path}>
         {view.map((cat, i) => {

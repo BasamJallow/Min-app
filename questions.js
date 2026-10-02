@@ -601,3 +601,45 @@ export function starGaps(answers) {
   }
   return gaps;
 }
+
+// ---------- Svag-punkt-træning (lokal motor) ----------
+
+// Spørgsmål om bestemte kompetencer, skiftevis én pr. kompetence, så alle bliver trænet.
+// For hver kompetence: opslagets egne spørgsmål først (fritekst før multiple choice), derefter ordbogens.
+export function weaknessQuestions(bank, weakSkills, count) {
+  const all = ['behavior', 'professional', 'motivation', 'brain']
+    .flatMap((key) => (bank?.[key] || []).map((q) => ({ ...q, category: key })));
+  const freeFirst = (a, b) => (a.type === 'free' ? 0 : 1) - (b.type === 'free' ? 0 : 1);
+
+  const pools = weakSkills.map((label) => {
+    const own = all.filter((q) => q.skill === label).sort(freeFirst);
+    const dict = skillByLabel(label);
+    const extra = dict ? [
+      {
+        type: 'free', category: 'behavior', star: true, skill: label, prompt: dict.behavior,
+        hint: `Brug STAR: situation, handling, resultat — og vis ${label}.`,
+      },
+      {
+        type: 'free', category: 'professional', skill: label, prompt: dict.professional,
+        hint: 'Vær konkret: hvad gjorde du, og hvad kom der ud af det?',
+      },
+    ] : [];
+    return [...own, ...extra];
+  });
+
+  // Generelle STAR-spørgsmål, hvis der stadig mangler.
+  const generic = (bank?.behavior || []).filter((q) => q.type === 'free').map((q) => ({ ...q, category: 'behavior' }));
+
+  const seen = new Set();
+  const result = [];
+  const take = (q) => {
+    if (!q || result.length >= count || seen.has(q.prompt)) return;
+    seen.add(q.prompt);
+    result.push(q);
+  };
+  for (let round = 0; round < 6 && result.length < count; round++) {
+    for (const pool of pools) take(pool[round]);
+  }
+  for (const q of generic) take(q);
+  return result;
+}

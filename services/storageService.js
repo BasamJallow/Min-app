@@ -127,3 +127,24 @@ export async function deleteJob(jobId) {
   // TODO: deleteDoc i 'jobs'-collection her.
   throw new Error('Firebase er ikke koblet på endnu.');
 }
+
+// Kompetencer for et opslag på tværs af sessioner: +1 hver gang den blev vist, −1 når den manglede.
+// Returnerer { sessions, weak } — weak er de svageste kompetencer (score ≤ 0), svageste først.
+export async function getWeakSkills(jobId, max = 3) {
+  if (USE_LOCAL_STORAGE) {
+    const sessions = (await readSessions()).filter((s) => s.jobId === jobId);
+    const score = {};
+    for (const s of sessions) {
+      for (const skill of s.strong || []) score[skill] = (score[skill] || 0) + 1;
+      for (const skill of s.weak || []) score[skill] = (score[skill] || 0) - 1;
+    }
+    const weak = Object.keys(score)
+      .filter((skill) => score[skill] <= 0)
+      .sort((a, b) => score[a] - score[b])
+      .slice(0, max);
+    return { sessions: sessions.length, weak };
+  }
+
+  // TODO: hent opslagets sessioner fra Firestore og tæl på samme måde.
+  throw new Error('Firebase er ikke koblet på endnu.');
+}

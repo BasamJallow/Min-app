@@ -4,11 +4,14 @@
 // Ved Firebase-integration: behold signaturerne — kun aiService skal pege på en Cloud Function.
 
 import { USE_MOCK_AI, AI_API } from '../config';
-import { CATEGORIES } from '../constants';
+import { CATEGORIES, WEAKNESS } from '../constants';
 import {
   analyzeJobPost, generateQuestions, evaluateFreeText, skillNote, looksLikeJobPost, strongAnswerTemplate,
+  weaknessQuestions,
 } from '../questions';
-import { analyzeWithAI, evaluateWithAI, strongAnswerWithAI } from './aiService';
+import {
+  analyzeWithAI, evaluateWithAI, strongAnswerWithAI, weaknessQuestionsWithAI,
+} from './aiService';
 import { analysisKey, getCachedAnalysis, saveCachedAnalysis } from './cacheService';
 import { stringList } from '../utils';
 
@@ -181,4 +184,32 @@ export async function getStrongAnswer(question, answer, skills = []) {
     }
   }
   return { ...strongAnswerTemplate(question, answer, skills), isTemplate: true };
+}
+
+// Kort session om de svageste kompetencer. job: { title, text, questions }.
+// Med AI: nye spørgsmål suppleret med opslagets egne; ellers kun den lokale motor.
+export async function getWeaknessQuestions(job, weakSkills) {
+  const local = weaknessQuestions(job.questions, weakSkills, WEAKNESS.questions);
+  let fresh = [];
+  if (!USE_MOCK_AI) {
+    try {
+      const asked = Object.values(job.questions || {}).flat().map((q) => q.prompt);
+      const data = await weaknessQuestionsWithAI(job, weakSkills, WEAKNESS.aiQuestions, asked);
+      const raw = Array.isArray(data.questions) ? data.questions : [];
+      fresh = raw
+        .map((q) => {
+          const category = q.category === 'professional' ? 'professional' : 'behavior';
+          const clean = cleanQuestion({ ...q, type: 'free' }, category, weakSkills);
+          return clean && { ...clean, category };
+        })
+        .filter(Boolean)
+        .slice(0, WEAKNESS.aiQuestions);
+    } catch (e) {
+      console.warn('AI-spørgsmål til svage punkter fejlede, bruger lokal motor:', e.message);
+    }
+  }
+
+  return [...fresh, ...local]
+    .slice(0, WEAKNESS.questions)
+    .map((q, i) => ({ ...q, id: `weak-${i}`, weight: WEAKNESS.weight }));
 }

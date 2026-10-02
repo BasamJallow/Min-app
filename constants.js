@@ -15,6 +15,13 @@ export const INTERVIEW = {
   xpPerPoint: 0.8,
 };
 
+// Svag-punkt-træning: antal spørgsmål i alt, heraf nye fra AI, og vægt som adfærd.
+export const WEAKNESS = {
+  questions: 5,
+  aiQuestions: 3,
+  weight: 1.5,
+};
+
 // Afstand til navigationsbaren på iOS, så tastaturet ikke dækker tekstfelter.
 export const KEYBOARD_OFFSET = 90;
 

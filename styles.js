@@ -250,25 +250,36 @@ export const styles = StyleSheet.create({
   },
 
   // Interview-simulator
-  interviewCard: {
-    marginHorizontal: 20,
+  // Kort til jobsamtale og svage punkter på banen
+  actionRow: {
+    flexDirection: 'row',
+    paddingHorizontal: 16,
     marginTop: 10,
+  },
+  actionCard: {
+    flex: 1,
+    marginHorizontal: 4,
     backgroundColor: CARD,
     borderRadius: 16,
     borderWidth: 2,
     borderColor: LIME_DARK,
     borderBottomWidth: 5,
-    paddingVertical: 12,
-    paddingHorizontal: 16,
+    paddingVertical: 10,
+    paddingHorizontal: 12,
   },
-  interviewCardTitle: {
+  actionCardDisabled: {
+    borderColor: BORDER,
+    opacity: 0.7,
+  },
+  actionCardTitle: {
     color: LIME,
-    fontSize: 16,
+    fontSize: 15,
     fontWeight: '900',
   },
-  interviewCardSub: {
+  actionCardSub: {
     color: MUTED,
-    fontSize: 13,
+    fontSize: 12,
+    lineHeight: 16,
     marginTop: 2,
   },
   interviewTopBar: {
