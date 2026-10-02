@@ -49,6 +49,26 @@ export const styles = StyleSheet.create({
     marginBottom: 20,
   },
 
+  keyboardRoot: {
+    flex: 1,
+    backgroundColor: BG,
+  },
+  loadingBox: {
+    alignItems: 'center',
+    paddingVertical: 24,
+  },
+  loadingTitle: {
+    marginTop: 14,
+    fontSize: 17,
+    fontWeight: '900',
+    color: TEXT,
+  },
+  loadingText: {
+    marginTop: 4,
+    fontSize: 14,
+    color: MUTED,
+  },
+
   // Duolingo-agtig knap med "3D"-kant nedenunder
   button: {
     backgroundColor: LIME,
@@ -437,6 +457,10 @@ export const styles = StyleSheet.create({
     borderWidth: 2,
     borderColor: BORDER,
     borderStyle: 'dashed',
+  },
+  boardEmptyCard: {
+    marginHorizontal: 16,
+    marginTop: 4,
   },
   emptyText: {
     color: MUTED,

@@ -29,6 +29,9 @@ export default function HistoryScreen({ navigation }) {
       <Text style={styles.emptyText}>
         Ingen sessioner endnu. Gennemfør en kategori for at se den dukke op her.
       </Text>
+      <TouchableOpacity style={styles.button} onPress={() => navigation.navigate('JobPost')}>
+        <Text style={styles.buttonText}>Indsæt et jobopslag</Text>
+      </TouchableOpacity>
     </View>
   );
 

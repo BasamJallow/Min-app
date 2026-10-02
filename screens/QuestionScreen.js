@@ -1,10 +1,13 @@
 import { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, ScrollView } from 'react-native';
+import {
+  View, Text, TextInput, TouchableOpacity, ScrollView, KeyboardAvoidingView, Keyboard, Platform,
+} from 'react-native';
 import { useRoute } from '@react-navigation/native';
-import { styles } from '../styles';
+import { styles, palette } from '../styles';
 import { evaluateAnswer } from '../services/questionService';
 import { saveSession } from '../services/storageService';
 import { breakdownItem, buildSession } from '../utils';
+import { KEYBOARD_OFFSET } from '../constants';
 
 export default function QuestionScreen({ navigation }) {
   const { jobId, skills, category, categoryKey, questions, jobPreview } = useRoute().params;
@@ -24,6 +27,7 @@ export default function QuestionScreen({ navigation }) {
 
   const handleFree = async () => {
     if (answer.length < 5 || busy) return;
+    Keyboard.dismiss();
     setBusy(true);
     try {
       const result = await evaluateAnswer(question, answer, skills);
@@ -79,63 +83,70 @@ export default function QuestionScreen({ navigation }) {
   };
 
   return (
-    <ScrollView contentContainerStyle={styles.container}>
-      <Text style={styles.categoryTag}>
-        {category} · {index + 1} af {questions.length}
-      </Text>
-      <Text style={styles.question}>{question.prompt}</Text>
+    <KeyboardAvoidingView
+      style={styles.keyboardRoot}
+      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+      keyboardVerticalOffset={KEYBOARD_OFFSET}
+    >
+      <ScrollView contentContainerStyle={styles.container} keyboardShouldPersistTaps="handled">
+        <Text style={styles.categoryTag}>
+          {category} · {index + 1} af {questions.length}
+        </Text>
+        <Text style={styles.question}>{question.prompt}</Text>
 
-      {question.type === 'free' ? (
-        <>
-          <Text style={styles.subtitle}>{question.hint}</Text>
-          <TextInput
-            style={styles.input}
-            multiline
-            placeholder="Skriv dit svar…"
-            value={answer}
-            onChangeText={setAnswer}
-            editable={!feedback}
-          />
-          {!feedback && (
+        {question.type === 'free' ? (
+          <>
+            <Text style={styles.subtitle}>{question.hint}</Text>
+            <TextInput
+              style={styles.input}
+              multiline
+              placeholder="Skriv dit svar…"
+              placeholderTextColor={palette.MUTED}
+              value={answer}
+              onChangeText={setAnswer}
+              editable={!feedback}
+            />
+            {!feedback && (
+              <TouchableOpacity
+                style={[styles.button, (answer.length < 5 || busy) && styles.buttonDisabled]}
+                disabled={answer.length < 5 || busy}
+                onPress={handleFree}
+              >
+                <Text style={styles.buttonText}>{busy ? 'Vurderer…' : 'Få feedback'}</Text>
+              </TouchableOpacity>
+            )}
+          </>
+        ) : (
+          question.options.map((opt, i) => (
             <TouchableOpacity
-              style={[styles.button, (answer.length < 5 || busy) && styles.buttonDisabled]}
-              disabled={answer.length < 5 || busy}
-              onPress={handleFree}
+              key={i}
+              style={[styles.option, feedback && i === question.correct && styles.optionCorrect]}
+              onPress={() => handleChoice(i)}
             >
-              <Text style={styles.buttonText}>{busy ? 'Vurderer…' : 'Få feedback'}</Text>
+              <Text style={styles.optionText}>{opt}</Text>
             </TouchableOpacity>
-          )}
-        </>
-      ) : (
-        question.options.map((opt, i) => (
-          <TouchableOpacity
-            key={i}
-            style={[styles.option, feedback && i === question.correct && styles.optionCorrect]}
-            onPress={() => handleChoice(i)}
-          >
-            <Text style={styles.optionText}>{opt}</Text>
-          </TouchableOpacity>
-        ))
-      )}
+          ))
+        )}
 
-      {feedback && (
-        <View style={styles.feedbackBox}>
-          <Text style={styles.feedbackLabel}>{feedback.label} · +{feedback.xp} XP</Text>
-          <Text style={styles.feedbackText}>{feedback.text}</Text>
+        {feedback && (
+          <View style={styles.feedbackBox}>
+            <Text style={styles.feedbackLabel}>{feedback.label} · +{feedback.xp} XP</Text>
+            <Text style={styles.feedbackText}>{feedback.text}</Text>
 
-          <TouchableOpacity style={styles.button} onPress={handleNext}>
-            <Text style={styles.buttonText}>
-              {isLast ? 'Se resultat' : 'Næste spørgsmål'}
-            </Text>
-          </TouchableOpacity>
-
-          {question.type === 'free' && (
-            <TouchableOpacity style={[styles.button, styles.buttonSecondary]} onPress={handleRetry}>
-              <Text style={[styles.buttonText, styles.buttonSecondaryText]}>Prøv igen</Text>
+            <TouchableOpacity style={styles.button} onPress={handleNext}>
+              <Text style={styles.buttonText}>
+                {isLast ? 'Se resultat' : 'Næste spørgsmål'}
+              </Text>
             </TouchableOpacity>
-          )}
-        </View>
-      )}
-    </ScrollView>
+
+            {question.type === 'free' && (
+              <TouchableOpacity style={[styles.button, styles.buttonSecondary]} onPress={handleRetry}>
+                <Text style={[styles.buttonText, styles.buttonSecondaryText]}>Prøv igen</Text>
+              </TouchableOpacity>
+            )}
+          </View>
+        )}
+      </ScrollView>
+    </KeyboardAvoidingView>
   );
 }

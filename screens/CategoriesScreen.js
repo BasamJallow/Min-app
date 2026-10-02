@@ -56,6 +56,15 @@ export default function CategoriesScreen({ navigation }) {
         <Text style={styles.bannerReadiness}>Samlet parathed: {readiness(progress.perCategory)}%</Text>
       </View>
 
+      {skills.length === 0 && (
+        <View style={[styles.emptyCard, styles.boardEmptyCard]}>
+          <Text style={styles.emptyText}>
+            Vi fandt ingen tydelige kompetencer i opslaget, så spørgsmålene er generelle.
+            Indsæt hele opslaget med opgaver og krav for at få spørgsmål målrettet stillingen.
+          </Text>
+        </View>
+      )}
+
       {/* Kompetenceoversigt — procent pr. kategori */}
       <View style={styles.competenceRow}>
         {view.map((c) => (

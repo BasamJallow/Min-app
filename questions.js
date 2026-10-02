@@ -24,8 +24,9 @@ const SKILLS = [
   },
   {
     label: 'ledelse',
-    // Ikke "leder" alene — "Vi leder efter…" står i næsten alle opslag.
-    synonyms: ['ledelse', 'ledere', 'lederrolle', 'lederskab', 'teamleder', 'ledende', 'leadership', 'personaleansvar', 'motivere'],
+    // Hverken "leder" eller "ledelse" alene — "Vi leder efter…" og "rapportere til ledelsen" er ikke lederroller.
+    matchLabel: false,
+    synonyms: ['ledelseserfaring', 'ledelsesansvar', 'lederrolle', 'lederskab', 'teamleder', 'ledende', 'leadership', 'personaleansvar', 'motivere'],
     behavior: 'Fortæl om en gang, hvor du tog føringen i en gruppe uden at have fået rollen formelt.',
     professional: 'Hvordan får du en gruppe til at trække i samme retning? Giv et eksempel, hvor du gjorde det.',
   },
@@ -102,9 +103,13 @@ function skillByLabel(label) {
   return SKILLS.find((s) => s.label === label);
 }
 
+function stemsFor(skill) {
+  return skill.matchLabel === false ? skill.synonyms : [skill.label, ...skill.synonyms];
+}
+
 function mentionsSkill(lower, label) {
   const skill = skillByLabel(label);
-  const stems = skill ? [skill.label, ...skill.synonyms] : [label];
+  const stems = skill ? stemsFor(skill) : [label];
   return stems.some((stem) => countStem(lower, stem) > 0);
 }
 
@@ -114,7 +119,7 @@ export function analyzeJobPost(text) {
   return SKILLS
     .map((s) => ({
       label: s.label,
-      hits: [s.label, ...s.synonyms].reduce((sum, stem) => sum + countStem(lower, stem), 0),
+      hits: stemsFor(s).reduce((sum, stem) => sum + countStem(lower, stem), 0),
     }))
     .filter((s) => s.hits > 0)
     .sort((a, b) => b.hits - a.hits)
