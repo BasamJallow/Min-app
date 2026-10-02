@@ -698,6 +698,29 @@ export const styles = StyleSheet.create({
   },
 
   // Historik-skærm
+  jobTitle: {
+    fontSize: 17,
+    fontWeight: '800',
+    color: TEXT,
+    marginBottom: 6,
+    letterSpacing: -0.3,
+  },
+  jobsLink: {
+    alignSelf: 'flex-start',
+    backgroundColor: CARD,
+    borderRadius: 12,
+    borderWidth: 2,
+    borderColor: BORDER,
+    borderBottomWidth: 4,
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+    marginBottom: 14,
+  },
+  jobsLinkText: {
+    color: LIME,
+    fontWeight: '900',
+    fontSize: 14,
+  },
   historyTitle: {
     fontSize: 26,
     fontWeight: '900',

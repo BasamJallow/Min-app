@@ -55,6 +55,7 @@ Hvis teksten tydeligvis IKKE er et jobopslag, så svar kun: {"isJobPost": false}
 Ellers svar i dette format:
 {
   "isJobPost": true,
+  "title": "kort stillingsbetegnelse og evt. virksomhed, fx 'Driftsleder hos Netto'",
   "skills": ["kompetence", ...],
   "questions": {
     "behavior": [ ... ],

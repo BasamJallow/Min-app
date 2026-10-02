@@ -51,8 +51,8 @@ npm run web      # åbn i browser
 
 | Krav | Hvor |
 |---|---|
-| Mindst 3 screens | 6 skærme i `/screens`: JobPost, Categories, Question, Result, History, Profile |
+| Mindst 3 screens | 7 skærme i `/screens`: JobPost, Categories, Question, Result, History, Profile, Jobs |
 | Mindst 3 views | `View` bruges i alle skærme, fx kort, banner, bundmenu og feedbackboks |
 | Mindst 2 knapper, mindst én navigerer | Fx "Analysér opslag" (navigerer til banen), "Prøv med eksempel", "Prøv igen", "Se resultat" og bundmenuen |
-| Mindst 1 FlatList | `HistoryScreen.js` og `ProfileScreen.js` |
+| Mindst 1 FlatList | `HistoryScreen.js`, `ProfileScreen.js` og `JobsScreen.js` |
 | Styling i separat fil | Al styling ligger i `styles.js`; ingen inline styles eller `StyleSheet` i skærmene |

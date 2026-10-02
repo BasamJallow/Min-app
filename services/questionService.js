@@ -43,6 +43,12 @@ function cleanQuestion(q, categoryKey, skills) {
   return null;
 }
 
+// Reserve-titel: første linje i opslaget, forkortet.
+function titleFromText(text) {
+  const first = text.trim().split('\n').map((l) => l.trim()).find(Boolean) || 'Jobopslag';
+  return first.length > 60 ? `${first.slice(0, 60)}…` : first;
+}
+
 // Hvert spørgsmål får id, kategori og kategoriens vægt med.
 function withCategoryMeta(bank) {
   const result = {};
@@ -85,10 +91,11 @@ async function analyzeAndClean(jobPost) {
     // For få brugbare spørgsmål fra AI — brug motorens i den kategori.
     bank[c.key] = clean.length >= MIN_PER_CATEGORY ? clean : fallback[c.key];
   }
-  return { isJobPost: true, skills, bank };
+  const title = typeof data.title === 'string' && data.title.trim() ? data.title.trim().slice(0, 80) : null;
+  return { isJobPost: true, title, skills, bank };
 }
 
-// Returnerer { isJobPost, jobId, skills, questions }. jobId knytter sessioner til netop dette opslag.
+// Returnerer { isJobPost, jobId, title, skills, questions }. jobId knytter sessioner til netop dette opslag.
 // Ligner teksten ikke et jobopslag, returneres kun { isJobPost: false } — medmindre force er sat,
 // så brugeren kan fortsætte med generelle spørgsmål.
 export async function getQuestions(jobPost, { force = false } = {}) {
@@ -113,6 +120,7 @@ export async function getQuestions(jobPost, { force = false } = {}) {
   return {
     isJobPost: true,
     jobId: String(Date.now()),
+    title: result.title || titleFromText(jobPost),
     skills: result.skills,
     questions: withCategoryMeta(result.bank),
   };

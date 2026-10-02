@@ -1,9 +1,9 @@
 import { useState, useCallback } from 'react';
-import { View, Text, FlatList, TouchableOpacity } from 'react-native';
+import { View, Text, FlatList, TouchableOpacity, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useFocusEffect } from '@react-navigation/native';
 import { styles } from '../styles';
-import { getSessions } from '../services/storageService';
+import { getSessions, getJob } from '../services/storageService';
 import { formatDate, percent, goTo, goToBoard } from '../utils';
 
 export default function HistoryScreen({ navigation }) {
@@ -35,8 +35,20 @@ export default function HistoryScreen({ navigation }) {
     </View>
   );
 
+  // Åbner banen for det opslag, sessionen hører til.
+  const openJob = async (session) => {
+    const job = session.jobId ? await getJob(session.jobId) : null;
+    if (!job) {
+      Alert.alert('Opslaget findes ikke længere', 'Det er slettet eller fra før "Mine opslag" fandtes.');
+      return;
+    }
+    navigation.navigate('Categories', {
+      jobId: job.jobId, skills: job.skills, questions: job.questions, jobPreview: job.preview,
+    });
+  };
+
   const renderItem = ({ item }) => (
-    <View style={styles.historyCard}>
+    <TouchableOpacity style={styles.historyCard} activeOpacity={0.7} onPress={() => openJob(item)}>
       <Text style={styles.historyDate}>{formatDate(item.date)}</Text>
       <Text style={styles.historyCategory}>{item.category}</Text>
       <Text style={styles.historyPreview} numberOfLines={2}>
@@ -47,7 +59,7 @@ export default function HistoryScreen({ navigation }) {
           {percent(item.score, item.total)}% · {item.score}/{item.total} rigtige · +{item.xp} XP
         </Text>
       </View>
-    </View>
+    </TouchableOpacity>
   );
 
   return (
