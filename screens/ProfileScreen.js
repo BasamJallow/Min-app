@@ -124,7 +124,7 @@ export default function ProfileScreen({ navigation }) {
         <TouchableOpacity style={styles.bottomNavItem} onPress={() => navigation.navigate('History')}>
           <Text style={styles.bottomNavIcon}>📋</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.bottomNavItem}>
+        <TouchableOpacity style={styles.bottomNavItem} onPress={() => navigation.navigate('Categories')}>
           <Text style={styles.bottomNavIcon}>💪</Text>
         </TouchableOpacity>
         <TouchableOpacity style={styles.bottomNavItem}>

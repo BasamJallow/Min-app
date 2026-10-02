@@ -1,8 +1,6 @@
 // Regelbaseret mock-motor: simulerer AI-analyse af jobopslaget og genererer spørgsmål.
 // Bruges af services/questionService.js — det er dét lag skærmene taler med.
-// Når et rigtigt API kobles på, kan denne fil fjernes uden at røre skærmene.
-
-import { CATEGORIES } from './constants';
+// Bruges når der ikke er en OpenAI-nøgle, og som reserve hvis AI-kaldet fejler.
 
 // Kompetenceordbog. Synonymer er ordstammer på dansk og engelsk og matches fra ordets start.
 const SKILLS = [
@@ -26,8 +24,9 @@ const SKILLS = [
   },
   {
     label: 'ledelse',
-    // Ikke "leder" alene — "Vi leder efter…" står i næsten alle opslag.
-    synonyms: ['ledelse', 'ledere', 'lederrolle', 'lederskab', 'teamleder', 'ledende', 'leadership', 'personaleansvar', 'motivere'],
+    // Hverken "leder" eller "ledelse" alene — "Vi leder efter…" og "rapportere til ledelsen" er ikke lederroller.
+    matchLabel: false,
+    synonyms: ['ledelseserfaring', 'ledelsesansvar', 'og ledelse', 'ledelse og', 'lederstilling', 'driftsleder', 'butikschef', 'lederrolle', 'lederskab', 'teamleder', 'ledende', 'leadership', 'personaleansvar', 'motivere'],
     behavior: 'Fortæl om en gang, hvor du tog føringen i en gruppe uden at have fået rollen formelt.',
     professional: 'Hvordan får du en gruppe til at trække i samme retning? Giv et eksempel, hvor du gjorde det.',
   },
@@ -104,10 +103,24 @@ function skillByLabel(label) {
   return SKILLS.find((s) => s.label === label);
 }
 
+function stemsFor(skill) {
+  return skill.matchLabel === false ? skill.synonyms : [skill.label, ...skill.synonyms];
+}
+
 function mentionsSkill(lower, label) {
   const skill = skillByLabel(label);
-  const stems = skill ? [skill.label, ...skill.synonyms] : [label];
+  const stems = skill ? stemsFor(skill) : [label];
   return stems.some((stem) => countStem(lower, stem) > 0);
+}
+
+const JOB_WORDS = ['stilling', 'job', 'ansøg', 'søger', 'opgaver', 'kvalifikation', 'erfaring', 'ansættelse',
+  'arbejdsplads', 'kollega', 'vi tilbyder', 'position', 'we are looking', 'responsibilit', 'requirements', 'apply'];
+
+// Groft tjek af om teksten ligner et jobopslag: kompetencer fundet, eller typiske jobord.
+export function looksLikeJobPost(text, skills) {
+  const lower = text.toLowerCase();
+  const jobWords = JOB_WORDS.filter((w) => countStem(lower, w) > 0).length;
+  return skills.length > 0 || jobWords >= 2;
 }
 
 // Returnerer kompetencerne i opslaget, sorteret efter hvor tit de nævnes. Tom liste hvis ingen.
@@ -116,7 +129,7 @@ export function analyzeJobPost(text) {
   return SKILLS
     .map((s) => ({
       label: s.label,
-      hits: [s.label, ...s.synonyms].reduce((sum, stem) => sum + countStem(lower, stem), 0),
+      hits: stemsFor(s).reduce((sum, stem) => sum + countStem(lower, stem), 0),
     }))
     .filter((s) => s.hits > 0)
     .sort((a, b) => b.hits - a.hits)
@@ -183,7 +196,7 @@ function evaluateBrain(lower, words) {
     : 'Sig dine antagelser højt, fx "Jeg antager, at…" — det er dem, intervieweren vurderer.');
   if (!steps) lines.push('Bryd problemet ned i trin: først, derefter, til sidst.');
   if (!numbers) lines.push('Sæt tal på undervejs, også selvom de er grove skøn.');
-  return { ...rate(points), text: lines.join(' ') };
+  return { ...rate(points), text: lines.join(' '), strong: [], weak: [] };
 }
 
 // Vurderer kompetencedækning og (for adfærd) STAR. skills er opslagets kompetencer.
@@ -236,7 +249,12 @@ function evaluateAgainstPost(lower, words, question, skills) {
   points += lengthPoints(words);
   if (words < 15) lines.push('Svaret er meget kort — uddyb det.');
 
-  return { ...rate(points), text: lines.join(' ') };
+  // Svag = spørgsmålets kompetence mangler, eller svaret rammer ingen af opslagets.
+  let weak = [];
+  if (target && !covered.includes(target)) weak = [target];
+  else if (!target && covered.length === 0) weak = missing.slice(0, 2);
+
+  return { ...rate(points), text: lines.join(' '), strong: covered, weak };
 }
 
 export function evaluateFreeText(answer, question, skills = []) {
@@ -314,6 +332,11 @@ export function generateQuestions(skills) {
         ],
         correct: 1,
         explanation: 'Antagelser gør dine tanker sporbare, og de kan udfordres — det er dét intervieweren vurderer.',
+      },
+      {
+        id: 'b6', type: 'free',
+        prompt: 'Hvor mange cykler holder der parkeret ved Nørreport Station en hverdag kl. 9? Tænk højt.',
+        hint: 'Start med antal pendlere, og hvor stor en andel der cykler.',
       },
     ],
     behavior: [
@@ -446,13 +469,26 @@ export function generateQuestions(skills) {
         correct: 1,
         explanation: 'Interviewerne vil se retning og modenhed — ikke en detaljeret karriereplan.',
       },
+      {
+        id: 'm5', type: 'free', skill,
+        prompt: skill
+          ? `Hvorfor motiverer det dig at arbejde med ${skill}, som opslaget lægger vægt på?`
+          : 'Hvilken del af jobbet glæder du dig mest til, og hvorfor?',
+        hint: 'Kobl det til noget, du konkret har gjort eller lært.',
+      },
+      {
+        id: 'm6', type: 'choice',
+        prompt: 'Du bliver spurgt om din lønforventning. Hvad er stærkest?',
+        options: [
+          'Siger at du tager, hvad de tilbyder.',
+          'Nævner et realistisk spænd baseret på fx din fagforenings lønstatistik.',
+          'Nævner et meget højt tal for at have noget at forhandle med.',
+        ],
+        correct: 1,
+        explanation: 'Et begrundet spænd viser, at du har undersøgt markedet, og giver plads til forhandling.',
+      },
     ],
   };
 
-  // Hvert spørgsmål får sin kategori og kategoriens vægt med.
-  const result = {};
-  for (const c of CATEGORIES) {
-    result[c.key] = bank[c.key].map((q) => ({ ...q, category: c.key, weight: c.weight }));
-  }
-  return result;
+  return bank;
 }

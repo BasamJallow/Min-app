@@ -43,10 +43,63 @@ export const styles = StyleSheet.create({
     borderRadius: 16,
     padding: 16,
     minHeight: 130,
+    // Lange tekster scroller inde i feltet, så knapperne under altid kan ses.
+    maxHeight: 240,
     textAlignVertical: 'top',
     fontSize: 16,
     color: TEXT,
     marginBottom: 20,
+  },
+
+  keyboardRoot: {
+    flex: 1,
+    backgroundColor: BG,
+  },
+  // Fast højde på opslagsfeltet — iOS respekterer ikke altid maxHeight på multiline-felter.
+  inputJobPost: {
+    height: 220,
+  },
+  footer: {
+    paddingHorizontal: 20,
+    paddingTop: 6,
+    paddingBottom: 28,
+    borderTopWidth: 1,
+    borderTopColor: BORDER,
+    backgroundColor: BG,
+  },
+  warningBox: {
+    backgroundColor: CARD,
+    borderRadius: 16,
+    borderWidth: 2,
+    borderColor: FLAME,
+    padding: 16,
+    marginBottom: 6,
+  },
+  warningTitle: {
+    color: FLAME,
+    fontSize: 16,
+    fontWeight: '900',
+    marginBottom: 4,
+  },
+  warningText: {
+    color: TEXT,
+    fontSize: 14,
+    lineHeight: 20,
+  },
+  loadingBox: {
+    alignItems: 'center',
+    paddingVertical: 24,
+  },
+  loadingTitle: {
+    marginTop: 14,
+    fontSize: 17,
+    fontWeight: '900',
+    color: TEXT,
+  },
+  loadingText: {
+    marginTop: 4,
+    fontSize: 14,
+    color: MUTED,
   },
 
   // Duolingo-agtig knap med "3D"-kant nedenunder
@@ -263,6 +316,12 @@ export const styles = StyleSheet.create({
     color: BG,
     letterSpacing: -0.4,
   },
+  bannerReadiness: {
+    fontSize: 13,
+    color: BG,
+    marginTop: 4,
+    fontWeight: '900',
+  },
   bannerSub: {
     fontSize: 13,
     color: LIME_DARK,
@@ -432,6 +491,10 @@ export const styles = StyleSheet.create({
     borderColor: BORDER,
     borderStyle: 'dashed',
   },
+  boardEmptyCard: {
+    marginHorizontal: 16,
+    marginTop: 4,
+  },
   emptyText: {
     color: MUTED,
     fontSize: 14,
@@ -570,6 +633,12 @@ export const styles = StyleSheet.create({
     fontWeight: '800',
     letterSpacing: 1,
     textTransform: 'uppercase',
+  },
+  resultEmpty: {
+    marginBottom: 8,
+  },
+  resultSectionGap: {
+    marginTop: 18,
   },
   resultBreakdownItem: {
     flexDirection: 'row',

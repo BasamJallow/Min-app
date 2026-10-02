@@ -5,7 +5,7 @@ import { useFocusEffect, useRoute } from '@react-navigation/native';
 import { styles } from '../styles';
 import { getProgress } from '../services/storageService';
 import { CATEGORIES } from '../constants';
-import { streakFromXp } from '../utils';
+import { streakFromXp, readiness } from '../utils';
 
 const OFFSET_STYLES = [styles.pathOffset0, styles.pathOffset1, styles.pathOffset2, styles.pathOffset3];
 
@@ -15,9 +15,10 @@ export default function CategoriesScreen({ navigation }) {
 
   useFocusEffect(useCallback(() => {
     let alive = true;
-    getProgress().then((p) => { if (alive) setProgress(p); });
+    // Kun dette opslags sessioner — et nyt opslag starter på en frisk bane.
+    getProgress(jobId).then((p) => { if (alive) setProgress(p); });
     return () => { alive = false; };
-  }, []));
+  }, [jobId]));
 
   const view = CATEGORIES.map((c) => {
     const stat = progress.perCategory[c.key];
@@ -52,7 +53,17 @@ export default function CategoriesScreen({ navigation }) {
         <Text style={styles.bannerSub}>
           {skills.length > 0 ? `Kompetencer: ${skills.join(', ')}` : 'Ingen specifikke kompetencer fundet'}
         </Text>
+        <Text style={styles.bannerReadiness}>Samlet parathed: {readiness(progress.perCategory)}%</Text>
       </View>
+
+      {skills.length === 0 && (
+        <View style={[styles.emptyCard, styles.boardEmptyCard]}>
+          <Text style={styles.emptyText}>
+            Vi fandt ingen tydelige kompetencer i opslaget, så spørgsmålene er generelle.
+            Indsæt hele opslaget med opgaver og krav for at få spørgsmål målrettet stillingen.
+          </Text>
+        </View>
+      )}
 
       {/* Kompetenceoversigt — procent pr. kategori */}
       <View style={styles.competenceRow}>
@@ -62,7 +73,9 @@ export default function CategoriesScreen({ navigation }) {
             <Text style={[styles.competencePct, c.pct === 0 && styles.competencePctEmpty]}>
               {c.pct}%
             </Text>
-            <Text style={styles.competenceLabel}>{c.name.split(' ')[0]}</Text>
+            <Text style={styles.competenceLabel} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.7}>
+              {c.name.split(' ')[0]}
+            </Text>
           </View>
         ))}
       </View>
@@ -109,13 +122,13 @@ export default function CategoriesScreen({ navigation }) {
 
       <View style={styles.bottomNav}>
         <TouchableOpacity style={styles.bottomNavItem} onPress={() => navigation.navigate('JobPost')}>
-          <Text style={[styles.bottomNavIcon, styles.bottomNavIconActive]}>🏠</Text>
+          <Text style={styles.bottomNavIcon}>🏠</Text>
         </TouchableOpacity>
         <TouchableOpacity style={styles.bottomNavItem} onPress={() => navigation.navigate('History')}>
           <Text style={styles.bottomNavIcon}>📋</Text>
         </TouchableOpacity>
         <TouchableOpacity style={styles.bottomNavItem}>
-          <Text style={styles.bottomNavIcon}>💪</Text>
+          <Text style={[styles.bottomNavIcon, styles.bottomNavIconActive]}>💪</Text>
         </TouchableOpacity>
         <TouchableOpacity
           style={styles.bottomNavItem}

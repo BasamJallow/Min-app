@@ -1,9 +1,9 @@
 // Datalag for sessioner og progression. Skærmene kalder kun saveSession, getSessions, getProgress.
-// Ved Firebase-integration: erstat USE_MOCK-grenene med Firestore-kald på en
-// 'sessions'-collection under den loggede bruger (addDoc, getDocs, where('jobId', '==', …)).
+// Ved Firebase-integration: udfyld firebaseConfig i /config.js og erstat USE_LOCAL_STORAGE-grenene
+// med Firestore-kald på en 'sessions'-collection under den loggede bruger (addDoc, getDocs, where('jobId', '==', …)).
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { USE_MOCK } from '../config';
+import { USE_LOCAL_STORAGE } from '../config';
 
 const SESSIONS_KEY = 'preppal.sessions';
 
@@ -17,7 +17,7 @@ async function readSessions() {
 }
 
 export async function saveSession(session) {
-  if (USE_MOCK) {
+  if (USE_LOCAL_STORAGE) {
     const current = await readSessions();
     try {
       await AsyncStorage.setItem(SESSIONS_KEY, JSON.stringify([...current, session]));
@@ -33,7 +33,7 @@ export async function saveSession(session) {
 
 // Nyeste først.
 export async function getSessions() {
-  if (USE_MOCK) {
+  if (USE_LOCAL_STORAGE) {
     const list = await readSessions();
     return list.slice().sort((a, b) => b.date - a.date);
   }
@@ -44,7 +44,7 @@ export async function getSessions() {
 
 // Statistik pr. kategori og samlet XP. Med jobId tælles kun det opslags sessioner.
 export async function getProgress(jobId) {
-  if (USE_MOCK) {
+  if (USE_LOCAL_STORAGE) {
     const all = await readSessions();
     const list = jobId ? all.filter((s) => s.jobId === jobId) : all;
     const perCategory = {};
