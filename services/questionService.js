@@ -3,7 +3,7 @@
 // Fejler AI-kaldet, falder vi tilbage til motoren, så appen altid virker.
 // Ved Firebase-integration: behold signaturerne — kun aiService skal pege på en Cloud Function.
 
-import { USE_MOCK } from '../config';
+import { USE_MOCK_AI } from '../config';
 import { CATEGORIES } from '../constants';
 import { analyzeJobPost, generateQuestions, evaluateFreeText, skillNote } from '../questions';
 import { analyzeWithAI, evaluateWithAI } from './aiService';
@@ -73,7 +73,7 @@ async function aiQuestions(jobPost) {
 // Returnerer { jobId, skills, questions }. jobId knytter sessioner til netop dette opslag.
 export async function getQuestions(jobPost) {
   let result;
-  if (USE_MOCK) {
+  if (USE_MOCK_AI) {
     result = mockQuestions(jobPost);
   } else {
     try {
@@ -117,7 +117,7 @@ export async function evaluateAnswer(question, answer, skills = []) {
       xp: correct ? 20 : 5,
       correct,
     };
-  } else if (USE_MOCK) {
+  } else if (USE_MOCK_AI) {
     result = evaluateFreeText(answer, question, skills);
   } else {
     try {

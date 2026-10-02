@@ -1,5 +1,5 @@
 // Central konfiguration. Nøgler læses fra .env (se .env.example) og står aldrig i koden.
-// USE_MOCK slår automatisk fra, når der er en OpenAI-nøgle i .env.
+// To uafhængige flag: AI slår til med en OpenAI-nøgle i .env, Firebase slår til med firebaseConfig.
 
 export const firebaseConfig = {
   apiKey: '',
@@ -17,4 +17,5 @@ export const AI_API = {
   model: process.env.EXPO_PUBLIC_OPENAI_MODEL || 'gpt-4o-mini',
 };
 
-export const USE_MOCK = !AI_API.apiKey;
+export const USE_MOCK_AI = !AI_API.apiKey;
+export const USE_LOCAL_STORAGE = !firebaseConfig.apiKey;
