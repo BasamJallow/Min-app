@@ -7,7 +7,7 @@ import { AI_API } from '../config';
 const TIMEOUT_MS = 45000;
 
 // Loft over hvor langt et svar må blive, så en fejl ikke kan bruge løs af tokens.
-const MAX_TOKENS = { analyze: 6000, evaluate: 800 };
+const MAX_TOKENS = { analyze: 6000, evaluate: 800, strong: 700 };
 
 // Sender en prompt og returnerer modellens svar som et JSON-objekt.
 async function chatJson(system, user, maxTokens, label) {
@@ -97,4 +97,24 @@ export async function evaluateWithAI(question, answer, skills) {
     svar: answer,
   });
   return chatJson(EVALUATE_SYSTEM, user, MAX_TOKENS.evaluate, 'feedback');
+}
+
+const STRONG_SYSTEM = `Du er en dansk interviewcoach. Omskriv kandidatens svar til et stærkt svar på samme spørgsmål.
+- Bevar kandidatens egne oplysninger. Opfind ALDRIG erfaringer, tal eller arbejdspladser.
+  Mangler noget, så skriv en pladsholder i kantede parenteser, fx [dit resultat med et tal].
+- Kategori "behavior": brug STAR (situation, handling, resultat) i jeg-form.
+- Kategori "brain": vis antagelser og trin, og slut med et tal.
+- Nævn naturligt de kompetencer fra opslaget, der passer til spørgsmålet.
+- Højst 120 ord, talesprog som til en samtale.
+Svar KUN med JSON: {"answer":"det stærke svar","changes":["2-3 korte punkter om hvad der er ændret"]}`;
+
+export async function strongAnswerWithAI(question, answer, skills) {
+  const user = JSON.stringify({
+    kategori: question.category,
+    spoergsmaal: question.prompt,
+    spoergsmaalets_kompetence: question.skill || null,
+    opslagets_kompetencer: skills,
+    svar: answer,
+  });
+  return chatJson(STRONG_SYSTEM, user, MAX_TOKENS.strong, 'stærkt svar');
 }

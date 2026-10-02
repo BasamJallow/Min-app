@@ -271,6 +271,63 @@ export function skillNote(question) {
     : '';
 }
 
+// Skabelon til "Se et stærkt svar" uden AI. Pladsholdere i [ ] udfyldes af brugeren.
+export function strongAnswerTemplate(question, answer, skills = []) {
+  const skill = question.skill || skills[0] || 'dine faglige styrker';
+  const lower = answer.toLowerCase();
+
+  if (question.category === 'brain') {
+    return {
+      text: 'Jeg antager, at [din antagelse]. Først regner jeg [trin 1]. Derefter [trin 2]. '
+        + 'Det giver cirka [dit tal]. Det mest usikre er [antagelse], så den ville jeg tjekke først.',
+      changes: [
+        'Antagelserne siges højt fra start',
+        'Problemet er brudt ned i trin',
+        'Svaret slutter med et tal og en usikkerhed',
+      ],
+    };
+  }
+
+  if (question.category === 'motivation') {
+    return {
+      text: 'Det, der gør, at jeg søger netop her, er [noget specifikt ved virksomheden]. '
+        + `Det hænger sammen med, at jeg [din erfaring], og jeg glæder mig til at arbejde med ${skill} `
+        + 'i [en konkret opgave fra opslaget].',
+      changes: [
+        'Nævner noget specifikt ved virksomheden',
+        `Kobler motivationen til ${skill} fra opslaget`,
+      ],
+    };
+  }
+
+  if (question.star) {
+    const star = detectStar(lower);
+    const changes = [];
+    if (!star.situation) changes.push('Tilføjet en kort situation');
+    if (!star.action) changes.push('Tydeligt hvad du selv gjorde');
+    if (!star.result) changes.push('Tilføjet et målbart resultat');
+    if (!mentionsSkill(lower, skill)) changes.push(`Nævner ${skill}, som opslaget lægger vægt på`);
+    if (changes.length === 0) changes.push('Samme STAR-opbygning — gør hvert led mere konkret');
+    return {
+      text: 'I mit [studiejob/projekt] skulle vi [situation og opgave]. '
+        + `Jeg tog ansvar for at [din handling], og her kom ${skill} i spil, da jeg [hvordan]. `
+        + 'Det betød, at [målbart resultat, fx et tal]. Bagefter tog jeg med mig, at [din læring].',
+      changes,
+    };
+  }
+
+  return {
+    text: 'Et konkret eksempel er, da jeg [situation]. '
+      + `Her brugte jeg ${skill} til at [din handling], fordi [begrundelse]. `
+      + 'Resultatet var [tal eller effekt], og det kan jeg tage med til jer.',
+    changes: [
+      'Bygget op om ét konkret eksempel',
+      `Nævner ${skill}, som opslaget lægger vægt på`,
+      'Slutter med et resultat',
+    ],
+  };
+}
+
 // ---------- Spørgsmål ----------
 
 function skillQuestions(skills) {

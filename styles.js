@@ -249,6 +249,42 @@ export const styles = StyleSheet.create({
     color: '#cbd5e1',
   },
 
+  // "Se et stærkt svar" i feedbackboksen
+  strongBox: {
+    marginTop: 16,
+    padding: 16,
+    borderRadius: 16,
+    backgroundColor: BG,
+    borderWidth: 1,
+    borderColor: LIME_DARK,
+  },
+  strongTitle: {
+    fontSize: 12,
+    color: LIME,
+    fontWeight: '900',
+    textTransform: 'uppercase',
+    letterSpacing: 1.2,
+    marginBottom: 8,
+  },
+  strongText: {
+    fontSize: 15,
+    lineHeight: 23,
+    color: TEXT,
+    marginBottom: 10,
+  },
+  strongChange: {
+    fontSize: 13,
+    lineHeight: 20,
+    color: LIME,
+    fontWeight: '700',
+  },
+  strongNote: {
+    fontSize: 12,
+    lineHeight: 18,
+    color: MUTED,
+    marginTop: 10,
+  },
+
   boardRoot: {
     flex: 1,
     backgroundColor: BG,

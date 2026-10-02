@@ -1,4 +1,4 @@
-// Datalag for spørgsmål og evaluering. Skærmene kalder kun getQuestions og evaluateAnswer.
+// Datalag for spørgsmål og evaluering. Skærmene kalder kun getQuestions, evaluateAnswer og getStrongAnswer.
 // Med en OpenAI-nøgle i .env bruges services/aiService.js; ellers den regelbaserede motor i /questions.js.
 // Fejler AI-kaldet, falder vi tilbage til motoren, så appen altid virker.
 // Ved Firebase-integration: behold signaturerne — kun aiService skal pege på en Cloud Function.
@@ -6,9 +6,9 @@
 import { USE_MOCK_AI, AI_API } from '../config';
 import { CATEGORIES } from '../constants';
 import {
-  analyzeJobPost, generateQuestions, evaluateFreeText, skillNote, looksLikeJobPost,
+  analyzeJobPost, generateQuestions, evaluateFreeText, skillNote, looksLikeJobPost, strongAnswerTemplate,
 } from '../questions';
-import { analyzeWithAI, evaluateWithAI } from './aiService';
+import { analyzeWithAI, evaluateWithAI, strongAnswerWithAI } from './aiService';
 import { analysisKey, getCachedAnalysis, saveCachedAnalysis } from './cacheService';
 
 const LABEL_XP = { 'Stærkt svar': 20, 'Godt forsøg': 12, 'Kan styrkes': 5 };
@@ -162,4 +162,18 @@ export async function evaluateAnswer(question, answer, skills = []) {
     }
   }
   return withWeight(result, question);
+}
+
+// Returnerer { text, changes, isTemplate }. Hentes først, når brugeren beder om det, så det ikke koster tokens.
+export async function getStrongAnswer(question, answer, skills = []) {
+  if (!USE_MOCK_AI) {
+    try {
+      const data = await strongAnswerWithAI(question, answer, skills);
+      if (typeof data.answer !== 'string' || !data.answer.trim()) throw new Error('Tomt svar fra AI');
+      return { text: data.answer.trim(), changes: stringList(data.changes, 3), isTemplate: false };
+    } catch (e) {
+      console.warn('AI-omskrivning fejlede, bruger skabelon:', e.message);
+    }
+  }
+  return { ...strongAnswerTemplate(question, answer, skills), isTemplate: true };
 }
