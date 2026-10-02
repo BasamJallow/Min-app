@@ -4,7 +4,7 @@
 // Ved Firebase-integration: uændret — kun aiService skal pege på en Cloud Function.
 
 import { USE_MOCK_AI } from '../config';
-import { INTERVIEW } from '../constants';
+import { INTERVIEW, SPEAKING } from '../constants';
 import { interviewPlan, interviewFollowUp, evaluateFreeText, starGaps } from '../questions';
 import { interviewTurnWithAI, interviewSummaryWithAI } from './aiService';
 import { buildSession, stringList } from '../utils';
@@ -23,8 +23,8 @@ export function createInterview(context) {
   };
 }
 
-function addMessage(state, role, text, kind) {
-  const message = { id: String(state.messages.length), role, text, kind, main: state.mainAsked };
+function addMessage(state, role, text, kind, extra = {}) {
+  const message = { id: String(state.messages.length), role, text, kind, main: state.mainAsked, ...extra };
   return { ...state, messages: [...state.messages, message] };
 }
 
@@ -86,8 +86,9 @@ export async function interviewerTurn(state) {
   return next;
 }
 
-export function addAnswer(state, text) {
-  return addMessage(state, 'candidate', text.trim(), 'answer');
+// seconds er sat, når svaret blev talt ind.
+export function addAnswer(state, text, seconds) {
+  return addMessage(state, 'candidate', text.trim(), 'answer', seconds ? { seconds } : {});
 }
 
 export function endInterview(state) {
@@ -109,6 +110,24 @@ function rounds(state) {
     else result.push({ main: m.main, answers: [m.text] });
   }
   return result;
+}
+
+// Tip om taletid ud fra de talte svar, samlet pr. hovedspørgsmål.
+function speakingTip(state) {
+  const perRound = {};
+  for (const m of state.messages) {
+    if (m.role === 'candidate' && m.seconds) perRound[m.main] = (perRound[m.main] || 0) + m.seconds;
+  }
+  const times = Object.values(perRound);
+  if (times.length === 0) return null;
+  const avg = Math.round(times.reduce((a, b) => a + b, 0) / times.length);
+  if (avg < SPEAKING.minSeconds) {
+    return `Dine talte svar var korte (ca. ${avg} sek.). Et godt STAR-svar tager typisk 1–2 minutter.`;
+  }
+  if (avg > SPEAKING.maxSeconds) {
+    return `Dine talte svar var lange (ca. ${avg} sek.). Hold dig til 1–2 minutter, så intervieweren kan følge med.`;
+  }
+  return null;
 }
 
 function scoreLabel(score) {
@@ -177,6 +196,10 @@ export async function summarizeInterview(state) {
     }
   }
   if (!result) result = mockSummary(state, local, answered.map((r) => r.answers.join(' ')));
+
+  // Taletid er noget, kun appen kan måle — det tilføjes uanset om AI eller lokal motor vurderede.
+  const tip = speakingTip(state);
+  if (tip) result = { ...result, improvements: [tip, ...result.improvements].slice(0, 4) };
 
   return {
     ...result,

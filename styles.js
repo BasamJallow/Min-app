@@ -343,11 +343,74 @@ export const styles = StyleSheet.create({
   bubbleTextCandidate: {
     color: BG,
   },
+  bubbleMeta: {
+    color: LIME_DARK,
+    fontSize: 11,
+    fontWeight: '800',
+    marginTop: 4,
+    textAlign: 'right',
+  },
+  interviewControls: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  interviewIcon: {
+    fontSize: 20,
+    marginHorizontal: 12,
+  },
+  voicePill: {
+    borderWidth: 1,
+    borderColor: BORDER,
+    borderRadius: 10,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+  },
+  voicePillText: {
+    color: MUTED,
+    fontSize: 11,
+    fontWeight: '800',
+  },
+  micButton: {
+    backgroundColor: LIME,
+    borderRadius: 16,
+    borderBottomWidth: 5,
+    borderBottomColor: LIME_DARK,
+    paddingVertical: 16,
+    marginTop: 10,
+  },
+  micButtonActive: {
+    backgroundColor: CORAL,
+    borderBottomColor: '#be123c',
+  },
+  micButtonText: {
+    color: BG,
+    textAlign: 'center',
+    fontWeight: '900',
+    fontSize: 16,
+    letterSpacing: 0.5,
+  },
+  micButtonTextActive: {
+    color: TEXT,
+  },
+  chatInputRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-end',
+    marginTop: 10,
+  },
   chatInput: {
-    height: 90,
-    minHeight: 90,
+    flex: 1,
+    height: 70,
+    minHeight: 70,
     marginBottom: 0,
-    marginTop: 6,
+    marginRight: 8,
+  },
+  sendButton: {
+    backgroundColor: LIME,
+    borderRadius: 16,
+    borderBottomWidth: 5,
+    borderBottomColor: LIME_DARK,
+    paddingVertical: 14,
+    paddingHorizontal: 16,
   },
 
   // "Se et stærkt svar" i feedbackboksen

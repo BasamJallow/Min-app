@@ -15,6 +15,12 @@ export const AI_API = {
   endpoint: 'https://api.openai.com/v1/chat/completions',
   apiKey: process.env.EXPO_PUBLIC_OPENAI_API_KEY || '',
   model: process.env.EXPO_PUBLIC_OPENAI_MODEL || 'gpt-4o-mini',
+  // Tale i jobsamtalen: tale til tekst og interviewerens AI-stemme.
+  transcribeEndpoint: 'https://api.openai.com/v1/audio/transcriptions',
+  transcribeModel: process.env.EXPO_PUBLIC_OPENAI_TRANSCRIBE_MODEL || 'gpt-4o-mini-transcribe',
+  speechEndpoint: 'https://api.openai.com/v1/audio/speech',
+  speechModel: process.env.EXPO_PUBLIC_OPENAI_SPEECH_MODEL || 'gpt-4o-mini-tts',
+  voice: process.env.EXPO_PUBLIC_OPENAI_VOICE || 'alloy',
 };
 
 export const USE_MOCK_AI = !AI_API.apiKey;

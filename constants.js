@@ -22,6 +22,12 @@ export const WEAKNESS = {
   weight: 1.5,
 };
 
+// Taletid for et godt mundtligt svar (sekunder).
+export const SPEAKING = {
+  minSeconds: 30,
+  maxSeconds: 150,
+};
+
 // Afstand til navigationsbaren på iOS, så tastaturet ikke dækker tekstfelter.
 export const KEYBOARD_OFFSET = 90;
 

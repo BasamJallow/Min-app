@@ -11,6 +11,13 @@ export function formatDate(ts) {
   return `${dd}/${mm} · ${hh}:${mi}`;
 }
 
+// 75 → "1:15"
+export function formatSeconds(total) {
+  const m = Math.floor(total / 60);
+  const s = String(total % 60).padStart(2, '0');
+  return `${m}:${s}`;
+}
+
 export function streakFromXp(xp) {
   return Math.floor(xp / 40);
 }
