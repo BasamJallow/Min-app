@@ -249,6 +249,60 @@ export const styles = StyleSheet.create({
     color: '#cbd5e1',
   },
 
+  // Forberedelsesark
+  prepLink: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginHorizontal: 20,
+    marginTop: 8,
+    paddingVertical: 10,
+    paddingHorizontal: 14,
+    backgroundColor: CARD,
+    borderRadius: 14,
+    borderWidth: 2,
+    borderColor: BORDER,
+  },
+  prepLinkText: {
+    color: TEXT,
+    fontSize: 15,
+    fontWeight: '900',
+  },
+  prepLinkSub: {
+    color: MUTED,
+    fontSize: 12,
+    fontWeight: '700',
+  },
+  prepSection: {
+    backgroundColor: CARD,
+    borderRadius: 16,
+    borderWidth: 2,
+    borderColor: BORDER,
+    padding: 16,
+    marginBottom: 12,
+  },
+  prepHeading: {
+    color: LIME,
+    fontSize: 14,
+    fontWeight: '900',
+    marginBottom: 8,
+  },
+  prepItem: {
+    color: TEXT,
+    fontSize: 14,
+    lineHeight: 21,
+    marginBottom: 4,
+  },
+  prepHighlight: {
+    marginBottom: 8,
+  },
+  prepHighlightSkill: {
+    color: TEXT,
+    fontSize: 15,
+    fontWeight: '900',
+    textTransform: 'capitalize',
+  },
+
   // Interview-simulator
   // Kort til jobsamtale og svage punkter på banen
   actionRow: {

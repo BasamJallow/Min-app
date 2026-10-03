@@ -643,3 +643,46 @@ export function weaknessQuestions(bank, weakSkills, count) {
   for (const q of generic) take(q);
   return result;
 }
+
+// ---------- Forberedelsesark (lokal motor) ----------
+
+export const PREP_CHECKLIST = [
+  'Læs opslaget igen dagen før, og streg de 3 vigtigste krav under',
+  'Forbered ét konkret STAR-eksempel pr. kompetence',
+  'Find vej og planlæg at være der 10 minutter før',
+  'Hav CV og ansøgning ved hånden — de har læst dem',
+  'Skriv dine spørgsmål til dem ned, så du ikke glemmer dem',
+];
+
+const PREP_ASK_THEM = [
+  'Hvordan ser de første tre måneder ud i stillingen?',
+  'Hvad kendetegner en person, der lykkes i den her rolle?',
+  'Hvordan er teamet sammensat, og hvem kommer jeg til at arbejde tættest med?',
+  'Hvad er den største udfordring for teamet lige nu?',
+  'Hvordan ser processen ud efter i dag?',
+];
+
+const PREP_RESEARCH = [
+  'Hvad virksomheden laver, og hvem deres kunder er',
+  'Nyheder eller projekter fra det seneste år (hjemmeside, LinkedIn, presse)',
+  'Deres værdier — og et eksempel på, hvor du selv lever op til én af dem',
+  'Hvem du skal til samtale med, fx på LinkedIn',
+];
+
+// Skabelon til forberedelsesarket uden AI: bygger på kompetencerne og opslagets egne spørgsmål.
+export function prepSheetTemplate(skills, bank) {
+  const highlights = skills.slice(0, 3).map((label) => ({
+    skill: label,
+    why: `Opslaget lægger vægt på ${label}. Forbered et konkret eksempel med et resultat.`,
+  }));
+  const expected = ['behavior', 'professional', 'motivation']
+    .map((key) => (bank?.[key] || []).find((q) => q.type === 'free'))
+    .filter(Boolean)
+    .map((q) => q.prompt);
+  return {
+    highlights,
+    askThem: PREP_ASK_THEM.slice(0, 4),
+    research: PREP_RESEARCH,
+    expected: expected.length > 0 ? expected : INTERVIEW_FALLBACK.slice(0, 3),
+  };
+}

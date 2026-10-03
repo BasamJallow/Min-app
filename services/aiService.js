@@ -9,6 +9,7 @@ const TIMEOUT_MS = 45000;
 // Loft over hvor langt et svar må blive, så en fejl ikke kan bruge løs af tokens.
 const MAX_TOKENS = {
   analyze: 6000, evaluate: 800, strong: 700, interviewTurn: 400, interviewSummary: 900, weakness: 1500,
+  prep: 1500,
 };
 
 // Sender en prompt og returnerer modellens svar som et JSON-objekt.
@@ -183,4 +184,23 @@ export async function weaknessQuestionsWithAI(context, weakSkills, count, alread
     allerede_stillet: alreadyAsked.slice(0, 20),
   });
   return chatJson(WEAKNESS_SYSTEM, user, MAX_TOKENS.weakness, 'svage punkter');
+}
+
+const PREP_SYSTEM = `Du er en dansk karriererådgiver. Lav et kort forberedelsesark til en jobsamtale ud fra jobopslaget.
+- Vær konkret og specifik for netop denne stilling og virksomhed — undgå generelle råd.
+- Skriv på dansk, korte punkter.
+Svar KUN med JSON:
+{"highlights":[{"skill":"kompetence","why":"én sætning om hvorfor den er vigtig her og hvad kandidaten skal vise"}],
+ "askThem":["4 gode spørgsmål kandidaten kan stille"],
+ "research":["3-4 ting kandidaten bør undersøge om virksomheden"],
+ "expected":["3-4 spørgsmål kandidaten sandsynligvis får"]}
+highlights skal have præcis 3 punkter.`;
+
+export async function prepSheetWithAI(context) {
+  const user = JSON.stringify({
+    titel: context.title || null,
+    opslag: (context.text || '').slice(0, MAX_POST_CHARS),
+    kompetencer: context.skills,
+  });
+  return chatJson(PREP_SYSTEM, user, MAX_TOKENS.prep, 'forberedelsesark');
 }

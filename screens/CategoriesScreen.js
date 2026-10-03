@@ -131,6 +131,15 @@ export default function CategoriesScreen({ navigation }) {
         </TouchableOpacity>
       </View>
 
+      <TouchableOpacity
+        style={styles.prepLink}
+        activeOpacity={0.8}
+        onPress={() => navigation.navigate('Prep', { jobId })}
+      >
+        <Text style={styles.prepLinkText}>📝 Forberedelsesark</Text>
+        <Text style={styles.prepLinkSub}>Det vigtigste inden samtalen ›</Text>
+      </TouchableOpacity>
+
       <ScrollView contentContainerStyle={styles.path}>
         {view.map((cat, i) => {
           const isActive = i === activeIndex;
