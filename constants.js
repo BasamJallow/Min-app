@@ -8,6 +8,36 @@ export const CATEGORIES = [
   { key: 'brain', name: 'Brain Teasers', desc: 'Vis din tankeproces', icon: '🧠', weight: 0.75 },
 ];
 
+// Interview-simulatoren: antal hovedspørgsmål og opfølgninger pr. spørgsmål.
+export const INTERVIEW = {
+  mainQuestions: 4,
+  maxFollowUps: 1,
+  xpPerPoint: 0.8,
+};
+
+// Svag-punkt-træning: antal spørgsmål i alt, heraf nye fra AI, og vægt som adfærd.
+export const WEAKNESS = {
+  questions: 5,
+  aiQuestions: 3,
+  weight: 1.5,
+};
+
+// Taletid for et godt mundtligt svar (sekunder).
+export const SPEAKING = {
+  minSeconds: 30,
+  maxSeconds: 150,
+};
+
+// "Tal frit" i jobsamtalen: hvornår en pause betyder, at kandidaten er færdig.
+// silenceDb kan justeres, hvis telefonen opfanger for meget eller for lidt baggrundsstøj.
+export const VOICE_TURN = {
+  silenceDb: -45,
+  silenceMs: 1800,
+  minSpeechMs: 700,
+  maxAnswerSeconds: 180,
+  startDelayMs: 300,
+};
+
 // Afstand til navigationsbaren på iOS, så tastaturet ikke dækker tekstfelter.
 export const KEYBOARD_OFFSET = 90;
 

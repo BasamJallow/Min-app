@@ -4,7 +4,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useFocusEffect } from '@react-navigation/native';
 import { styles } from '../styles';
 import { getSessions, getProgress } from '../services/storageService';
-import { formatDate, streakFromXp } from '../utils';
+import { formatDate, streakFromXp, goTo, goToBoard } from '../utils';
 
 export default function ProfileScreen({ navigation }) {
   const [sessions, setSessions] = useState([]);
@@ -84,7 +84,7 @@ export default function ProfileScreen({ navigation }) {
     sessions.length > recent.length ? (
       <TouchableOpacity
         style={styles.button}
-        onPress={() => navigation.navigate('History')}
+        onPress={() => goTo(navigation, 'History')}
       >
         <Text style={styles.buttonText}>Se al historik</Text>
       </TouchableOpacity>
@@ -118,13 +118,13 @@ export default function ProfileScreen({ navigation }) {
       />
 
       <View style={styles.bottomNav}>
-        <TouchableOpacity style={styles.bottomNavItem} onPress={() => navigation.navigate('JobPost')}>
+        <TouchableOpacity style={styles.bottomNavItem} onPress={() => goTo(navigation, 'JobPost')}>
           <Text style={styles.bottomNavIcon}>🏠</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.bottomNavItem} onPress={() => navigation.navigate('History')}>
+        <TouchableOpacity style={styles.bottomNavItem} onPress={() => goTo(navigation, 'History')}>
           <Text style={styles.bottomNavIcon}>📋</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.bottomNavItem} onPress={() => navigation.navigate('Categories')}>
+        <TouchableOpacity style={styles.bottomNavItem} onPress={() => goToBoard(navigation)}>
           <Text style={styles.bottomNavIcon}>💪</Text>
         </TouchableOpacity>
         <TouchableOpacity style={styles.bottomNavItem}>
