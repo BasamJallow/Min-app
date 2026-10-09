@@ -19,6 +19,14 @@
     },
     "web": {
       "favicon": "./assets/favicon.png"
-    }
+    },
+    "plugins": [
+      [
+        "expo-audio",
+        {
+          "microphonePermission": "PrepPal bruger mikrofonen, så du kan svare med stemmen i jobsamtalen."
+        }
+      ]
+    ]
   }
 }

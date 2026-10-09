@@ -1,16 +1,25 @@
-import { useState } from 'react';
+import { useCallback, useState } from 'react';
 import {
   View, Text, TextInput, TouchableOpacity, ScrollView,
   KeyboardAvoidingView, ActivityIndicator, Keyboard, Platform,
 } from 'react-native';
+import { useFocusEffect } from '@react-navigation/native';
 import { styles, palette } from '../styles';
 import { getQuestions } from '../services/questionService';
+import { saveJob, getJobs } from '../services/storageService';
 import { EXAMPLE_JOB_POST, KEYBOARD_OFFSET } from '../constants';
 
 export default function JobPostScreen({ navigation }) {
   const [text, setText] = useState('');
   const [loading, setLoading] = useState(false);
   const [notJobPost, setNotJobPost] = useState(false);
+  const [jobCount, setJobCount] = useState(0);
+
+  useFocusEffect(useCallback(() => {
+    let alive = true;
+    getJobs().then((jobs) => { if (alive) setJobCount(jobs.length); });
+    return () => { alive = false; };
+  }, []));
 
   const handleChange = (value) => {
     setText(value);
@@ -21,18 +30,15 @@ export default function JobPostScreen({ navigation }) {
     Keyboard.dismiss();
     setLoading(true);
     try {
-      const { isJobPost, jobId, skills, questions } = await getQuestions(text, { force });
+      const { isJobPost, jobId, title, skills, questions } = await getQuestions(text, { force });
       if (!isJobPost) {
         setNotJobPost(true);
         return;
       }
       setNotJobPost(false);
-      navigation.navigate('Categories', {
-        jobId,
-        skills,
-        questions,
-        jobPreview: text.trim().slice(0, 100),
-      });
+      const preview = text.trim().slice(0, 100);
+      await saveJob({ jobId, date: Date.now(), title, preview, text: text.trim(), skills, questions });
+      navigation.navigate('Categories', { jobId, skills, questions, jobPreview: preview });
     } finally {
       setLoading(false);
     }
@@ -47,6 +53,11 @@ export default function JobPostScreen({ navigation }) {
       keyboardVerticalOffset={KEYBOARD_OFFSET}
     >
       <ScrollView contentContainerStyle={styles.container} keyboardShouldPersistTaps="handled">
+        {jobCount > 0 && (
+          <TouchableOpacity style={styles.jobsLink} onPress={() => navigation.navigate('Jobs')}>
+            <Text style={styles.jobsLinkText}>📁 Mine opslag ({jobCount})</Text>
+          </TouchableOpacity>
+        )}
         <Text style={styles.title}>Indsæt jobopslag</Text>
         <Text style={styles.subtitle}>
           PrepPal analyserer opslaget og laver øvelsesspørgsmål til dig.

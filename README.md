@@ -28,6 +28,8 @@ Uden nøgle kører appen på en lokal regelbaseret motor. Sådan slår du OpenAI
 2. Indsæt nøglen efter `EXPO_PUBLIC_OPENAI_API_KEY=`
 3. Genstart med `npx expo start -c`
 
+**Tale i jobsamtalen:** Med nøglen starter jobsamtalen i "Tal frit": intervieweren taler, og når du holder en kort pause, sender appen dit svar automatisk. Skift til "💬 Chat" for at skrive eller svare med 🎙️ i stedet. Intervieweren læser op med telefonens stemme som standard; tryk på "Telefonstemme" for at skifte til OpenAIs mere naturlige stemme. Første gang spørger telefonen om adgang til mikrofonen.
+
 `.env` står i `.gitignore` og må aldrig committes. Tjek med `git status`, at den ikke dukker op.
 Nøglen bliver bygget ind i appen, så den er kun til test — del ikke builds med nøglen i.
 
@@ -47,12 +49,16 @@ npm run web      # åbn i browser
 2. Vælg en kategori (Brain Teasers, Adfærd, Faglig, Motivation) og besvar spørgsmålene.
 3. Tjek din progression og historik under 👤-fanen evt
 
+### Betaling med Stripe (test)
+
+"PrepPal Pro" under 👤 åbner et Stripe Payment Link. Opret et produkt og et Payment Link i Stripe Dashboard (sandkassen), og sæt linket i `.env` som `EXPO_PUBLIC_STRIPE_PAYMENT_LINK`. Betal med testkortet `4242 4242 4242 4242`. Linket er offentligt — der ligger ingen Stripe-nøgle i appen.
+
 ## Obligatoriske krav — hvor de er opfyldt
 
 | Krav | Hvor |
 |---|---|
-| Mindst 3 screens | 6 skærme i `/screens`: JobPost, Categories, Question, Result, History, Profile |
+| Mindst 3 screens | 10 skærme i `/screens`: JobPost, Categories, Question, Result, History, Profile, Jobs, Interview, Prep, Pro |
 | Mindst 3 views | `View` bruges i alle skærme, fx kort, banner, bundmenu og feedbackboks |
 | Mindst 2 knapper, mindst én navigerer | Fx "Analysér opslag" (navigerer til banen), "Prøv med eksempel", "Prøv igen", "Se resultat" og bundmenuen |
-| Mindst 1 FlatList | `HistoryScreen.js` og `ProfileScreen.js` |
+| Mindst 1 FlatList | `HistoryScreen.js`, `ProfileScreen.js`, `JobsScreen.js` og `InterviewScreen.js` |
 | Styling i separat fil | Al styling ligger i `styles.js`; ingen inline styles eller `StyleSheet` i skærmene |
