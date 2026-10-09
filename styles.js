@@ -249,6 +249,27 @@ export const styles = StyleSheet.create({
     color: '#cbd5e1',
   },
 
+  // PrepPal Pro
+  proCard: {
+    backgroundColor: LIME,
+    borderRadius: 16,
+    borderBottomWidth: 5,
+    borderBottomColor: LIME_DARK,
+    padding: 16,
+    marginBottom: 20,
+  },
+  proCardTitle: {
+    color: BG,
+    fontSize: 17,
+    fontWeight: '900',
+  },
+  proCardSub: {
+    color: LIME_DARK,
+    fontSize: 13,
+    fontWeight: '800',
+    marginTop: 2,
+  },
+
   // Forberedelsesark
   prepLink: {
     flexDirection: 'row',

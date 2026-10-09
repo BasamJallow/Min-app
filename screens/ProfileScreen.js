@@ -4,18 +4,21 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useFocusEffect } from '@react-navigation/native';
 import { styles } from '../styles';
 import { getSessions, getProgress } from '../services/storageService';
+import { getProStatus } from '../services/paymentService';
 import { formatDate, streakFromXp, goTo, goToBoard } from '../utils';
 
 export default function ProfileScreen({ navigation }) {
   const [sessions, setSessions] = useState([]);
   const [progress, setProgress] = useState({ perCategory: {}, xp: 0, sessions: 0 });
+  const [pro, setPro] = useState(null);
 
   useFocusEffect(useCallback(() => {
     let alive = true;
-    Promise.all([getSessions(), getProgress()]).then(([s, p]) => {
+    Promise.all([getSessions(), getProgress(), getProStatus()]).then(([s, p, sub]) => {
       if (!alive) return;
       setSessions(s);
       setProgress(p);
+      setPro(sub);
     });
     return () => { alive = false; };
   }, []));
@@ -33,6 +36,11 @@ export default function ProfileScreen({ navigation }) {
         <Text style={styles.profileName}>Din profil</Text>
         <Text style={styles.profileSub}>Din progression og historik</Text>
       </View>
+
+      <TouchableOpacity style={styles.proCard} activeOpacity={0.8} onPress={() => navigation.navigate('Pro')}>
+        <Text style={styles.proCardTitle}>{pro ? '⭐ PrepPal Pro (aktiv)' : '⭐ Opgrader til PrepPal Pro'}</Text>
+        <Text style={styles.proCardSub}>{pro ? 'Se dit abonnement ›' : 'Få alle AI-funktioner ›'}</Text>
+      </TouchableOpacity>
 
       <View style={styles.statGrid}>
         <View style={styles.statCard}>

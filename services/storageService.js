@@ -8,6 +8,7 @@ import { USE_LOCAL_STORAGE } from '../config';
 
 const SESSIONS_KEY = 'preppal.sessions';
 const JOBS_KEY = 'preppal.jobs';
+const SUBSCRIPTION_KEY = 'preppal.subscription';
 const MAX_JOBS = 20;
 
 async function readList(key) {
@@ -146,5 +147,35 @@ export async function getWeakSkills(jobId, max = 3) {
   }
 
   // TODO: hent opslagets sessioner fra Firestore og tæl på samme måde.
+  throw new Error('Firebase er ikke koblet på endnu.');
+}
+
+// Abonnementsstatus for PrepPal Pro: { active, test, since } eller null.
+export async function getSubscription() {
+  if (USE_LOCAL_STORAGE) {
+    try {
+      const raw = await AsyncStorage.getItem(SUBSCRIPTION_KEY);
+      return raw ? JSON.parse(raw) : null;
+    } catch {
+      return null;
+    }
+  }
+
+  // TODO: læs fra brugerens dokument i Firestore (sat af en Stripe-webhook i en Cloud Function).
+  throw new Error('Firebase er ikke koblet på endnu.');
+}
+
+export async function saveSubscription(subscription) {
+  if (USE_LOCAL_STORAGE) {
+    try {
+      if (subscription) await AsyncStorage.setItem(SUBSCRIPTION_KEY, JSON.stringify(subscription));
+      else await AsyncStorage.removeItem(SUBSCRIPTION_KEY);
+    } catch {
+      // Gemning fejlede — status vises igen næste gang.
+    }
+    return subscription;
+  }
+
+  // TODO: skrives af Stripe-webhooken i en Cloud Function, ikke af appen.
   throw new Error('Firebase er ikke koblet på endnu.');
 }

@@ -23,5 +23,11 @@ export const AI_API = {
   voice: process.env.EXPO_PUBLIC_OPENAI_VOICE || 'alloy',
 };
 
+// Stripe Payment Link (fra Stripe Dashboard). Linket er offentligt — det er bare en adresse, ingen nøgle.
+// Links fra sandkassen starter med https://buy.stripe.com/test_ og flytter ingen rigtige penge.
+export const STRIPE = {
+  paymentLink: process.env.EXPO_PUBLIC_STRIPE_PAYMENT_LINK || '',
+};
+
 export const USE_MOCK_AI = !AI_API.apiKey;
 export const USE_LOCAL_STORAGE = !firebaseConfig.apiKey;

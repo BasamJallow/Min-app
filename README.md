@@ -49,11 +49,15 @@ npm run web      # åbn i browser
 2. Vælg en kategori (Brain Teasers, Adfærd, Faglig, Motivation) og besvar spørgsmålene.
 3. Tjek din progression og historik under 👤-fanen evt
 
+### Betaling med Stripe (test)
+
+"PrepPal Pro" under 👤 åbner et Stripe Payment Link. Opret et produkt og et Payment Link i Stripe Dashboard (sandkassen), og sæt linket i `.env` som `EXPO_PUBLIC_STRIPE_PAYMENT_LINK`. Betal med testkortet `4242 4242 4242 4242`. Linket er offentligt — der ligger ingen Stripe-nøgle i appen.
+
 ## Obligatoriske krav — hvor de er opfyldt
 
 | Krav | Hvor |
 |---|---|
-| Mindst 3 screens | 9 skærme i `/screens`: JobPost, Categories, Question, Result, History, Profile, Jobs, Interview, Prep |
+| Mindst 3 screens | 10 skærme i `/screens`: JobPost, Categories, Question, Result, History, Profile, Jobs, Interview, Prep, Pro |
 | Mindst 3 views | `View` bruges i alle skærme, fx kort, banner, bundmenu og feedbackboks |
 | Mindst 2 knapper, mindst én navigerer | Fx "Analysér opslag" (navigerer til banen), "Prøv med eksempel", "Prøv igen", "Se resultat" og bundmenuen |
 | Mindst 1 FlatList | `HistoryScreen.js`, `ProfileScreen.js`, `JobsScreen.js` og `InterviewScreen.js` |

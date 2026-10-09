@@ -38,6 +38,25 @@ export const VOICE_TURN = {
   startDelayMs: 300,
 };
 
+// PrepPal Pro (test med Stripe). Prisen skal matche produktet i Stripe Dashboard.
+export const PRO = {
+  name: 'PrepPal Pro',
+  price: '49 kr. / måned',
+  benefits: [
+    'Ubegrænsede jobsamtaler med AI-interviewer',
+    'Tal frit med naturlig AI-stemme',
+    'Forberedelsesark målrettet hvert opslag',
+    'Træning af dine svage punkter',
+  ],
+};
+
+// Stripes testkort — virker kun i sandkassen.
+export const STRIPE_TEST_CARDS = [
+  { number: '4242 4242 4242 4242', result: 'Betalingen lykkes' },
+  { number: '4000 0000 0000 0002', result: 'Kortet bliver afvist' },
+  { number: '4000 0025 0000 3155', result: 'Kræver godkendelse (3D Secure)' },
+];
+
 // Afstand til navigationsbaren på iOS, så tastaturet ikke dækker tekstfelter.
 export const KEYBOARD_OFFSET = 90;
 
