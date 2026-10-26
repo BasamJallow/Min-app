@@ -20,18 +20,18 @@ Appen er udviklet af Basam Jallow. Claude Code er brugt som kodeassistent underv
 |---|---|
 | Feedback bundet til opslaget | Kompetencer findes i opslaget (dansk/engelsk ordbog eller OpenAI), og feedback på fritekst tjekker, om svaret viser dem, og om adfærdssvar har STAR (situation, handling, resultat) |
 | Generativ AI (OpenAI) | Analyse af opslag, spørgsmål, feedback, "Se et stærkt svar", forberedelsesark og interviewer — med lokal regelbaseret motor som reserve |
-| 🎤 Jobsamtale | Realistisk samtale med en AI-interviewer, der stiller opfølgende spørgsmål. "Tal frit": brugeren taler, og appen opdager pauser og sender svaret selv (mikrofon, tale til tekst og oplæsning) |
-| 🎯 Svage punkter | Kort session med spørgsmål om de kompetencer, brugeren har klaret dårligst |
-| 📝 Forberedelsesark | Det vigtigste at fremhæve, spørgsmål til virksomheden og en tjekliste — kan deles |
-| 📁 Mine opslag | Alle analyserede opslag gemmes, så man kan fortsætte træningen senere |
+| Jobsamtale | Realistisk samtale med en AI-interviewer, der stiller opfølgende spørgsmål. "Tal frit": brugeren taler, og appen opdager pauser og sender svaret selv (mikrofon, tale til tekst og oplæsning) |
+| Svage punkter | Kort session med spørgsmål om de kompetencer, brugeren har klaret dårligst |
+| Forberedelsesark | Det vigtigste at fremhæve, spørgsmål til virksomheden og en tjekliste — kan deles |
+| Mine opslag | Alle analyserede opslag gemmes, så man kan fortsætte træningen senere |
 | Resultat og progression | Stærke/svage kompetencer efter hver kategori, samlet parathed og frisk bane for hvert nyt opslag |
-| ⭐ PrepPal Pro (test) | Testbetaling med Stripe Payment Link i sandkassen |
+| PrepPal Pro (test) | Testbetaling med Stripe Payment Link i sandkassen |
 
 ## Krav fra opgaven — hvor de er opfyldt
 
 | Krav | Hvor |
 |---|---|
-| 1-2 nye knapper | Fx "🎤 Jobsamtale", "🎯 Svage punkter", "📝 Forberedelsesark", "Se et stærkt svar", "Prøv igen" og "Prøv med eksempel" |
+| 1-2 nye knapper | Fx "Jobsamtale", "Svage punkter", "Forberedelsesark", "Se et stærkt svar", "Prøv igen" og "Prøv med eksempel" |
 | Ny screen | Nye skærme i iteration 2: `JobsScreen`, `InterviewScreen`, `PrepScreen`, `ProScreen` (10 skærme i alt i `/screens`) |
 | Navigation | Stack-navigation sat op med `createNativeStackNavigator` i `App.js` |
 | Ny funktionalitet | Generativ AI (OpenAI) og mikrofon/tale i jobsamtalen |
@@ -62,11 +62,11 @@ Scan QR-koden med Expo Go (Android) eller Kamera-appen (iOS).
 
 1. Indsæt et jobopslag (eller tryk **Prøv med eksempel**) og tryk **Analysér opslag**
 2. Vælg en kategori på banen og besvar spørgsmålene — fritekstsvar får feedback, og du kan trykke **Prøv igen** eller **Se et stærkt svar**
-3. Prøv **🎤 Jobsamtale** og tal frit med intervieweren
-4. Brug **🎯 Svage punkter** og **📝 Forberedelsesark** inden samtalen
-5. Se historik under 📋 og progression under 👤
+3. Prøv **Jobsamtale** og tal frit med intervieweren
+4. Brug **Svage punkter** og **Forberedelsesark** inden samtalen
+5. Se historik og progression via bundmenuen
 
-**Stripe (test):** "PrepPal Pro" under 👤 åbner et Payment Link fra Stripes sandkasse. Betal med testkortet `4242 4242 4242 4242`, en fremtidig udløbsdato og en vilkårlig CVC.
+**Stripe (test):** "PrepPal Pro" på profilen åbner et Payment Link fra Stripes sandkasse. Betal med testkortet `4242 4242 4242 4242`, en fremtidig udløbsdato og en vilkårlig CVC.
 
 ## Projektstruktur
 
