@@ -8,10 +8,6 @@ PrepPal er en React Native / Expo-app, der forbereder brugeren til en jobsamtale
 - **Demovideo – godkendelsesopgave 2:** https://www.loom.com/share/5311e7aaf16d409d873ad2b76aa0e1fb
 - Demovideo – godkendelsesopgave 1: https://www.loom.com/share/1c78aa8be41d49ecbb7eb69dae4815ff
 
-## Hvem har kodet hvad
-
-Appen er udviklet af Basam Jallow. Claude Code er brugt som kodeassistent undervejs.
-
 ## Nyt i iteration 2
 
 Ændringerne bygger på feedbacken fra godkendelsesopgave 1 og brugerinterviews. Den vigtigste indsigt var, at feedback kun føltes troværdig, når den var bundet til jobopslaget.
