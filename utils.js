@@ -11,6 +11,13 @@ export function formatDate(ts) {
   return `${dd}/${mm} · ${hh}:${mi}`;
 }
 
+// 75 → "1:15"
+export function formatSeconds(total) {
+  const m = Math.floor(total / 60);
+  const s = String(total % 60).padStart(2, '0');
+  return `${m}:${s}`;
+}
+
 export function streakFromXp(xp) {
   return Math.floor(xp / 40);
 }
@@ -19,6 +26,12 @@ export function badgeFor(pct) {
   if (pct >= 80) return { emoji: '🏆', title: 'Fremragende!', sub: 'Du er klar til samtalen.' };
   if (pct >= 50) return { emoji: '💪', title: 'Godt gået', sub: 'Der er stadig plads til at skærpe et par svar.' };
   return { emoji: '📚', title: 'Godt forsøg', sub: 'Kør kategorien igen — gentagelse gør stor forskel.' };
+}
+
+// Renser en liste fra et AI-svar til ikke-tomme tekster.
+export function stringList(value, max) {
+  if (!Array.isArray(value)) return [];
+  return value.filter((v) => typeof v === 'string' && v.trim()).map((v) => v.trim()).slice(0, max);
 }
 
 export function percent(score, total) {
@@ -78,4 +91,18 @@ export function buildSession({ jobId, category, categoryKey, jobPreview, breakdo
     xp: breakdown.reduce((sum, b) => sum + (b.xp || 0), 0),
     ...skillSummary(breakdown),
   };
+}
+
+// I React Navigation 7 åbner navigate() en NY skærm, hvis den ikke er den aktuelle.
+// goTo går i stedet tilbage til skærmen, hvis den allerede ligger i stakken, og bevarer dens data.
+export function goTo(navigation, name, params) {
+  const inStack = navigation.getState().routes.some((r) => r.name === name);
+  if (inStack) navigation.popTo(name, params, { merge: true });
+  else navigation.navigate(name, params);
+}
+
+// Tilbage til den åbne bane — eller til "Mine opslag", hvis der ikke er nogen.
+export function goToBoard(navigation) {
+  const hasBoard = navigation.getState().routes.some((r) => r.name === 'Categories');
+  goTo(navigation, hasBoard ? 'Categories' : 'Jobs');
 }

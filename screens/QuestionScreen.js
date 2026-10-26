@@ -4,7 +4,7 @@ import {
 } from 'react-native';
 import { useRoute } from '@react-navigation/native';
 import { styles, palette } from '../styles';
-import { evaluateAnswer } from '../services/questionService';
+import { evaluateAnswer, getStrongAnswer } from '../services/questionService';
 import { saveSession } from '../services/storageService';
 import { breakdownItem, buildSession } from '../utils';
 import { KEYBOARD_OFFSET } from '../constants';
@@ -16,6 +16,8 @@ export default function QuestionScreen({ navigation }) {
   const [feedback, setFeedback] = useState(null);
   const [breakdown, setBreakdown] = useState([]);
   const [busy, setBusy] = useState(false);
+  const [strongAnswer, setStrongAnswer] = useState(null);
+  const [strongLoading, setStrongLoading] = useState(false);
 
   const question = questions[index];
   const isLast = index === questions.length - 1;
@@ -51,7 +53,17 @@ export default function QuestionScreen({ navigation }) {
   // Nyt forsøg på samme fritekstspørgsmål — kun det seneste forsøg tæller.
   const handleRetry = () => {
     setFeedback(null);
+    setStrongAnswer(null);
     setBreakdown((prev) => prev.slice(0, -1));
+  };
+
+  const handleStrongAnswer = async () => {
+    setStrongLoading(true);
+    try {
+      setStrongAnswer(await getStrongAnswer(question, answer, skills));
+    } finally {
+      setStrongLoading(false);
+    }
   };
 
   const handleNext = async () => {
@@ -59,6 +71,7 @@ export default function QuestionScreen({ navigation }) {
       setIndex(index + 1);
       setAnswer('');
       setFeedback(null);
+      setStrongAnswer(null);
       return;
     }
 
@@ -132,6 +145,33 @@ export default function QuestionScreen({ navigation }) {
           <View style={styles.feedbackBox}>
             <Text style={styles.feedbackLabel}>{feedback.label} · +{feedback.xp} XP</Text>
             <Text style={styles.feedbackText}>{feedback.text}</Text>
+
+            {strongAnswer && (
+              <View style={styles.strongBox}>
+                <Text style={styles.strongTitle}>Et stærkt svar</Text>
+                <Text style={styles.strongText}>{strongAnswer.text}</Text>
+                {strongAnswer.changes.map((c) => (
+                  <Text key={c} style={styles.strongChange}>✓ {c}</Text>
+                ))}
+                <Text style={styles.strongNote}>
+                  {strongAnswer.isTemplate
+                    ? 'Skabelon — udfyld felterne i [ ] med dine egne erfaringer.'
+                    : 'Omskrevet ud fra dit svar. Udfyld eventuelle [ ] med dine egne erfaringer.'}
+                </Text>
+              </View>
+            )}
+
+            {question.type === 'free' && !strongAnswer && (
+              <TouchableOpacity
+                style={[styles.button, styles.buttonSecondary, strongLoading && styles.buttonDisabled]}
+                disabled={strongLoading}
+                onPress={handleStrongAnswer}
+              >
+                <Text style={[styles.buttonText, styles.buttonSecondaryText]}>
+                  {strongLoading ? 'Skriver et stærkt svar…' : 'Se et stærkt svar'}
+                </Text>
+              </TouchableOpacity>
+            )}
 
             <TouchableOpacity style={styles.button} onPress={handleNext}>
               <Text style={styles.buttonText}>

@@ -1,23 +1,23 @@
-// Datalag for spørgsmål og evaluering. Skærmene kalder kun getQuestions og evaluateAnswer.
+// Datalag for spørgsmål og evaluering. Skærmene kalder kun getQuestions, evaluateAnswer og getStrongAnswer.
 // Med en OpenAI-nøgle i .env bruges services/aiService.js; ellers den regelbaserede motor i /questions.js.
 // Fejler AI-kaldet, falder vi tilbage til motoren, så appen altid virker.
 // Ved Firebase-integration: behold signaturerne — kun aiService skal pege på en Cloud Function.
 
 import { USE_MOCK_AI, AI_API } from '../config';
-import { CATEGORIES } from '../constants';
+import { CATEGORIES, WEAKNESS } from '../constants';
 import {
-  analyzeJobPost, generateQuestions, evaluateFreeText, skillNote, looksLikeJobPost,
+  analyzeJobPost, generateQuestions, evaluateFreeText, skillNote, looksLikeJobPost, strongAnswerTemplate,
+  weaknessQuestions,
 } from '../questions';
-import { analyzeWithAI, evaluateWithAI } from './aiService';
+import {
+  analyzeWithAI, evaluateWithAI, strongAnswerWithAI, weaknessQuestionsWithAI,
+} from './aiService';
 import { analysisKey, getCachedAnalysis, saveCachedAnalysis } from './cacheService';
+import { stringList } from '../utils';
 
 const LABEL_XP = { 'Stærkt svar': 20, 'Godt forsøg': 12, 'Kan styrkes': 5 };
 const MIN_PER_CATEGORY = 3;
 
-function stringList(value, max) {
-  if (!Array.isArray(value)) return [];
-  return value.filter((v) => typeof v === 'string' && v.trim()).map((v) => v.trim()).slice(0, max);
-}
 
 // Sorterer ugyldige spørgsmål fra, så skærmene altid får det format, de forventer.
 function cleanQuestion(q, categoryKey, skills) {
@@ -41,6 +41,12 @@ function cleanQuestion(q, categoryKey, skills) {
     };
   }
   return null;
+}
+
+// Reserve-titel: første linje i opslaget, forkortet.
+function titleFromText(text) {
+  const first = text.trim().split('\n').map((l) => l.trim()).find(Boolean) || 'Jobopslag';
+  return first.length > 60 ? `${first.slice(0, 60)}…` : first;
 }
 
 // Hvert spørgsmål får id, kategori og kategoriens vægt med.
@@ -85,10 +91,11 @@ async function analyzeAndClean(jobPost) {
     // For få brugbare spørgsmål fra AI — brug motorens i den kategori.
     bank[c.key] = clean.length >= MIN_PER_CATEGORY ? clean : fallback[c.key];
   }
-  return { isJobPost: true, skills, bank };
+  const title = typeof data.title === 'string' && data.title.trim() ? data.title.trim().slice(0, 80) : null;
+  return { isJobPost: true, title, skills, bank };
 }
 
-// Returnerer { isJobPost, jobId, skills, questions }. jobId knytter sessioner til netop dette opslag.
+// Returnerer { isJobPost, jobId, title, skills, questions }. jobId knytter sessioner til netop dette opslag.
 // Ligner teksten ikke et jobopslag, returneres kun { isJobPost: false } — medmindre force er sat,
 // så brugeren kan fortsætte med generelle spørgsmål.
 export async function getQuestions(jobPost, { force = false } = {}) {
@@ -113,6 +120,7 @@ export async function getQuestions(jobPost, { force = false } = {}) {
   return {
     isJobPost: true,
     jobId: String(Date.now()),
+    title: result.title || titleFromText(jobPost),
     skills: result.skills,
     questions: withCategoryMeta(result.bank),
   };
@@ -162,4 +170,46 @@ export async function evaluateAnswer(question, answer, skills = []) {
     }
   }
   return withWeight(result, question);
+}
+
+// Returnerer { text, changes, isTemplate }. Hentes først, når brugeren beder om det, så det ikke koster tokens.
+export async function getStrongAnswer(question, answer, skills = []) {
+  if (!USE_MOCK_AI) {
+    try {
+      const data = await strongAnswerWithAI(question, answer, skills);
+      if (typeof data.answer !== 'string' || !data.answer.trim()) throw new Error('Tomt svar fra AI');
+      return { text: data.answer.trim(), changes: stringList(data.changes, 3), isTemplate: false };
+    } catch (e) {
+      console.warn('AI-omskrivning fejlede, bruger skabelon:', e.message);
+    }
+  }
+  return { ...strongAnswerTemplate(question, answer, skills), isTemplate: true };
+}
+
+// Kort session om de svageste kompetencer. job: { title, text, questions }.
+// Med AI: nye spørgsmål suppleret med opslagets egne; ellers kun den lokale motor.
+export async function getWeaknessQuestions(job, weakSkills) {
+  const local = weaknessQuestions(job.questions, weakSkills, WEAKNESS.questions);
+  let fresh = [];
+  if (!USE_MOCK_AI) {
+    try {
+      const asked = Object.values(job.questions || {}).flat().map((q) => q.prompt);
+      const data = await weaknessQuestionsWithAI(job, weakSkills, WEAKNESS.aiQuestions, asked);
+      const raw = Array.isArray(data.questions) ? data.questions : [];
+      fresh = raw
+        .map((q) => {
+          const category = q.category === 'professional' ? 'professional' : 'behavior';
+          const clean = cleanQuestion({ ...q, type: 'free' }, category, weakSkills);
+          return clean && { ...clean, category };
+        })
+        .filter(Boolean)
+        .slice(0, WEAKNESS.aiQuestions);
+    } catch (e) {
+      console.warn('AI-spørgsmål til svage punkter fejlede, bruger lokal motor:', e.message);
+    }
+  }
+
+  return [...fresh, ...local]
+    .slice(0, WEAKNESS.questions)
+    .map((q, i) => ({ ...q, id: `weak-${i}`, weight: WEAKNESS.weight }));
 }

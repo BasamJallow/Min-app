@@ -2,7 +2,7 @@ import { View, Text, ScrollView, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRoute } from '@react-navigation/native';
 import { styles } from '../styles';
-import { badgeFor, percent, skillSummary } from '../utils';
+import { badgeFor, percent, skillSummary, goToBoard } from '../utils';
 
 export default function ResultScreen({ navigation }) {
   const {
@@ -20,9 +20,7 @@ export default function ResultScreen({ navigation }) {
   };
 
   const backToBoard = () => {
-    // Navigate falder tilbage til den eksisterende Categories-instans,
-    // så vi bevarer skills/questions/jobPreview fra route-params.
-    navigation.navigate('Categories');
+    goToBoard(navigation);
   };
 
   return (
